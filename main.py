@@ -1,40 +1,38 @@
-# import wave
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.io import wavfile
+import matplotlib.pyplot as plt
 
-#Import the .wav audio
-f = 'sounds/Drone1.wav'
-s, a = wavfile.read(f)
-print('Sampling Rate:', s)
-print('Audio Shape:', np.shape(a))
+filename = 'sounds/Drone1.wav'
+sampleRate, audioData = wavfile.read(filename)
+print('Sampling Rate:', sampleRate)
+print('Audio Shape:', np.shape(audioData))
 
-#number of samples
-sampleNo = a.shape[0]
-#audio time duration
-audioLen = sampleNo / s
+# number of samples
+sampleNo = audioData.shape[0]
+# audio time duration
+audioLen = sampleNo / sampleRate
 
-t = np.linspace(0, audioLen, sampleNo)
-plt.plot(t, a, color='purple')
-plt.xlabel('Time (s)')
-plt.show()
+# t = np.linspace(0, audioLen, sampleNo)
+# plt.plot(t, a, color='purple')
+# plt.xlabel('Time (s)')
+# plt.show()
 
-if len(a.shape) == 1: # if mono
+if len(audioData.shape) == 1:  # if mono
     outFile = open("data.txt", "w")
-    outFile.write(str(s))
-    for el in a:
+    outFile.write(str(sampleRate))
+    for el in audioData:
         outFile.write(str(el))
         outFile.write('\n')
     outFile.close()
-elif len(a.shape) == 2:  # if stereo
-    outFileL = open("dataL.txt", "w")
-    outFileR = open("dataR.txt", "w")
-    outFileL.write(str(s))
-    outFileR.write(str(s))
-    for i in range(0, s):
-        outFileL.write(str(a[i, 0]))
+elif len(audioData.shape) == 2:  # if stereo
+    outFileL, outFileR = open("dataL.txt", "w"), open("dataR.txt", "w")
+    strSampleRate = str(sampleRate)
+    outFileL.write(strSampleRate)
+    outFileR.write(strSampleRate)
+    for i in range(0, sampleRate):
+        outFileL.write(str(audioData[i, 0]))
         outFileL.write('\n')
-        outFileR.write(str(a[i, 1]))
+        outFileR.write(str(audioData[i, 1]))
         outFileR.write('\n')
 else:
     print("Wrong data format")
