@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+from numpy.fft import fft
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
 
@@ -23,9 +24,23 @@ if __name__ == '__main__':
             outFile.write('\n')
         outFile.write(str(audioData[sampleNo - 1]))
         outFile.close()
-        # t = np.linspace(0, audioLen, sampleNo)
-        # plt.plot(t, a, color='purple')
+
+        # sampleInterval = 1.0 / sampleRate
+        # t = np.arange(0, 1, sampleInterval)
+        # plt.plot(t, audioData[0:sampleRate], color='purple')
         # plt.xlabel('Time (s)')
+        # plt.show()
+
+        audio_transform = fft(audioData)
+        # print(list(map(np.abs, audio_transform[0:40])))
+        # N = len(audio_transform)
+        # n = np.arange(N)
+        # T = N / sampleRate
+        # freq = n / T
+        # print(freq)
+
+        # plt.plot(freq, np.abs(audio_transform), color='blue')
+        # plt.xlim(0, 10)
         # plt.show()
     elif len(audioData.shape) == 2:  # if stereo
         outFileL, outFileR = open("dataL.txt", "w"), open("dataR.txt", "w")
