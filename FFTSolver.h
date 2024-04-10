@@ -3,20 +3,35 @@
 
 #include "vector"
 #include "complex"
+#include "FunctionSampling.h"
+#include "cassert"
 
 using std::vector, std::complex;
 typedef unsigned long long ullong;
 
+
+size_t nearestPower2(size_t N);
+
 class FFTSolver {
-   vector<complex<long double>> data;
-   ullong sampleNo;
+   FunctionSampling sampling;
    bool isInverse;
 
 public:
-   FFTSolver(vector<complex<long double>> &_data, const ullong &_sampleNo, const bool _isInverse) : data(std::move(_data)), sampleNo(_sampleNo), isInverse(_isInverse) {}
 
-   void getFFT();
+   FFTSolver(FunctionSampling& _sampling, const bool _isInverse) : isInverse(_isInverse) {
+        assert(sampling.sampleNo != 0);
+        if ((sampling.sampleNo & (sampling.sampleNo - 1)) != 0) { // if sampleNo is not a power of 2
+            size_t restSampleNo = nearestPower2(sampling.sampleNo);
+            size_t restSampleRate = 1 / restSampleNo;
+            vector<long long> restSampleData;
+            std::copy(sampling.sampleData.begin(), sampling.sampleData.begin() + restSampleNo, std::back_inserter(restSampleData));
+//            sampling = FunctionSampling(restSampleRate, restSampleData);
+        }
 
+
+   }
+
+   void FFT();
 };
 
 

@@ -27,7 +27,9 @@ FunctionSampling parseAudiofile(const string& filename) {
 
 int main() {
     FunctionSampling audio = parseAudiofile("../data.txt");
-    cout << audio;
+//    cout << audio;
+    auto solver = FFTSolver(audio, false);
+    cout << nearestPower2(129);
     return 0;
 }
 
