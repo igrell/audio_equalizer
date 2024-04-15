@@ -7,23 +7,23 @@
 #include "cassert"
 
 using std::vector, std::complex;
-typedef unsigned long long ullong;
-
+typedef long double ldouble;
 
 size_t nearestPower2(size_t N);
 
 bool isPower2(const size_t& N);
 
 class FFTSolver {
-   SignalSampling sampling;
-   bool isInverse;
+    SignalSampling sampling;
+    const bool isInverse;
+    vector<complex<ldouble>> data;
+//    vector<complex<ldouble>> transform;
 
 public:
 
    FFTSolver(SignalSampling _sampling, bool _isInverse);
 
-
-   void FFT();
+   vector<complex<ldouble>>FFT();
 };
 
 

@@ -10,13 +10,13 @@ typedef long double ldouble;
 
 class SignalSampling {
 public:
-    vector<long long> sampleData;
+    vector<ldouble> sampleData;
     size_t sampleNo;
     size_t sampleRate;
     ldouble length;
     ldouble sampleInterval;
 
-    SignalSampling(const size_t _sampleRate, vector<long long> _sampleData) :
+    SignalSampling(const size_t _sampleRate, vector<ldouble> _sampleData) :
             sampleData(std::move(_sampleData)),
             sampleNo(sampleData.size()),
             sampleRate(_sampleRate),
