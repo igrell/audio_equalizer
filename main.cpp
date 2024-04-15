@@ -4,12 +4,13 @@
 #include <iostream>
 #include "fstream"
 #include "vector"
-#include "FunctionSampling.h"
+#include "SignalSampling.h"
 #include "FFTSolver.h"
+#include "NonPower2Exception.h"
 
 using std::ifstream, std::cout, std::string, std::vector;
 
-FunctionSampling parseAudiofile(const string& filename) {
+SignalSampling parseAudiofile(const string& filename) {
     ifstream file;
     file.open(filename, ifstream::in);
 
@@ -26,11 +27,13 @@ FunctionSampling parseAudiofile(const string& filename) {
 
 
 int main() {
-    FunctionSampling audio = parseAudiofile("../data.txt");
-//    cout << audio;
-    auto solver = FFTSolver(audio, false);
-    cout << nearestPower2(129);
-    return 0;
+    SignalSampling audio = parseAudiofile("../data.txt");
+//        vector<long long> data{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+//        size_t rate = 5;
+//        SignalSampling sampling(rate, data);
+        cout << audio;
+        FFTSolver solver(audio, false);
+        return 0;
 }
 
 #endif //MAIN

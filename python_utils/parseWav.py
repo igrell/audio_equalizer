@@ -16,7 +16,7 @@ if __name__ == '__main__':
     audioLen = sampleNo / sampleRate
 
     if len(audioData.shape) == 1:  # if mono
-        outFile = open("data.txt", "w")
+        outFile = open("../data.txt", "w")
         outFile.write(str(sampleRate))
         outFile.write('\n')
         for i in range(0, sampleNo - 1):
@@ -27,23 +27,22 @@ if __name__ == '__main__':
 
         # sampleInterval = 1.0 / sampleRate
         # t = np.arange(0, 1, sampleInterval)
-        # plt.plot(t, audioData[0:sampleRate], color='purple')
+        # plt.plot(t, audioData[0:(sampleRate)], color='purple')
         # plt.xlabel('Time (s)')
         # plt.show()
 
-        audio_transform = fft(audioData)
-        # print(list(map(np.abs, audio_transform[0:40])))
+
+        # audio_transform = fft(audioData)
         # N = len(audio_transform)
         # n = np.arange(N)
         # T = N / sampleRate
         # freq = n / T
-        # print(freq)
 
         # plt.plot(freq, np.abs(audio_transform), color='blue')
         # plt.xlim(0, 10)
         # plt.show()
     elif len(audioData.shape) == 2:  # if stereo
-        outFileL, outFileR = open("dataL.txt", "w"), open("dataR.txt", "w")
+        outFileL, outFileR = open("../dataL.txt", "w"), open("../dataR.txt", "w")
         strSampleRate = str(sampleRate)
         outFileL.write(strSampleRate)
         outFileL.write('\n')
@@ -56,5 +55,21 @@ if __name__ == '__main__':
             outFileR.write('\n')
         outFileL.write(str(audioData[sampleNo - 1, 0]))
         outFileR.write(str(audioData[sampleNo - 1, 1]))
+
+        #number of samples
+        # na = audioData.shape[0]
+        #audio time duration
+        # la = na / sampleRate
+
+        #plot signal versus time
+        # t = np.linspace(0,la,na)
+        # plt.subplot(2,1,1)
+        # plt.plot(t,audioData[:,0],'b-')
+        # plt.ylabel('Left')
+        # plt.subplot(2,1,2)
+        # plt.plot(t,audioData[:,1],'r-')
+        # plt.ylabel('Right')
+        # plt.xlabel('Time (s)')
+        # plt.show()
     else:
         print("Wrong data format")
