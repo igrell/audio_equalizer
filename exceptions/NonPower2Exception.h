@@ -2,6 +2,7 @@
 #define AUDIO_EQUALIZER_NONPOWER2EXCEPTION_H
 
 #include "iostream"
+#include "cmath"
 
 using std::cout;
 
@@ -14,7 +15,7 @@ public:
     NonPower2Exception(const size_t& _sampleNo, const size_t& _newSampleNo) : sampleNo(_sampleNo), newSampleNo(_newSampleNo) {}
 
     void message() const {
-       cout << "\nWarning: number of samples (" << sampleNo << ") isn't a power of 2; reducing samples to a power of 2 (" << newSampleNo << ")\n";
+        cout << "\nWarning: number of samples (" << sampleNo << ") isn't a power of 2; reducing samples to the nearest power of 2 (2^" << log2(newSampleNo) << " = " << newSampleNo << ")\n";
     }
 };
 

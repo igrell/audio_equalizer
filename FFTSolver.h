@@ -23,9 +23,7 @@ public:
    FFTSolver(SignalSampling _sampling, bool _isInverse);
 
 
-//   }
-
-//   void FFT();
+   void FFT();
 };
 
 

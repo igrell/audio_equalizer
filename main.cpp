@@ -28,9 +28,6 @@ SignalSampling parseAudiofile(const string& filename) {
 
 int main() {
     SignalSampling audio = parseAudiofile("../data.txt");
-//        vector<long long> data{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-//        size_t rate = 5;
-//        SignalSampling sampling(rate, data);
         cout << audio;
         FFTSolver solver(audio, false);
         return 0;

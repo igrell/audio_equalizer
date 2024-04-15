@@ -6,10 +6,6 @@
 
 using std::cout;
 
-//void FFTSolver::FFT() {
-//   cout << "he\n";
-//}
-
 size_t nearestPower2(size_t N) {
     if (N == 1) return 1;
     size_t res = 2;
@@ -36,4 +32,8 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
             throw NonPower2Exception(sampleNo, _sampling.sampleNo);
         }
     } catch (NonPower2Exception& exception) { exception.message(); }
+}
+
+void FFTSolver::FFT() {
+
 }
