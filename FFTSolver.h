@@ -20,7 +20,11 @@ class FFTSolver {
 
 public:
 
-   FFTSolver(const SignalSampling& _sampling, bool _isInverse);
+   FFTSolver(SignalSampling  _sampling, bool _isInverse);
+
+   void computeRecFFT();
+
+   static void recFFT(vector<complex<ldouble>>&, const size_t&);
 
    void FFT();
 };
@@ -32,6 +36,6 @@ vector<complex<T>> vecToComplex(const vector<T>& vec) {
     return res;
 }
 
-void bitSwap(vector<size_t>&);
+complex<ldouble> Wn(size_t&, size_t&);
 
 #endif //AUDIO_EQUALIZER_FFTSOLVER_H

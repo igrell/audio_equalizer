@@ -25,12 +25,16 @@ SignalSampling parseAudiofile(const string& filename) {
     return {sampleRate, audioData};
 }
 
+
 int main() {
     SignalSampling audio = parseAudiofile("../data.txt");
-    FFTSolver solver(audio, false);
-    solver.FFT();
-    vector<size_t> vec{0,1,2,3,4,5,6,7};
-//    for (auto el : audio.sampleData) { cout << el << " "; }
+    SignalSampling test(2, vector<ldouble>{0,1,2,3});
+    for (auto el : test.sampleData) cout << el << " ";
+    cout << "\n";
+    FFTSolver testSolver(test, false);
+    testSolver.computeRecFFT();
+//    FFTSolver solver(audio, false);
+//    solver.computeRecFFT();
     return 0;
 }
 
