@@ -5,10 +5,9 @@
 #include "vector"
 #include "iostream"
 #include "NonPower2Exception.h"
-#include "numeric"
 #include "format"
 
-using std::cout;
+using std::cout, std::stack, std::pair;
 typedef long double ldouble;
 
 size_t nearestPower2(size_t N) {
@@ -22,12 +21,49 @@ bool isPower2(const size_t &N) {
     return (N > 0 && ((N & (N - 1)) == 0));
 }
 
-complex<ldouble> Wn(const size_t &N, const size_t &n) {
-    return std::exp((complex<ldouble>(2.0 * M_PI * n / ldouble(N)) * complex<ldouble>{0, 1}));
+
+complex<ldouble> Wn(const size_t &N, const size_t &n) { // TODO optimize
+    return std::exp((complex<ldouble>(2.0 * M_PI * ldouble(n) / ldouble(N)) * complex<ldouble>{0, 1}));
 }
 
+template<typename T>
+size_t bitLen(T n) { return (std::format("{:b}", n)).length(); }
+template size_t bitLen(size_t);
+
+template<typename T>
+vector<T> bitReversePermuteVec(const vector<T> &vec) {
+    const auto &N = vec.size();
+    vector<T> res = vec;
+    auto len = bitLen(N - 1); // get length suitable to 2^n
+    for (size_t i = 1 ; i < (N / 2) - 1 ; ++i) std::swap(res.at(i), res.at(bitReverse(i, len))); // edge indexes changed as edges never swap
+    return res;
+}
+template vector<complex<ldouble>> bitReversePermuteVec(const vector<complex<ldouble>>&);
+
+template<typename T>
+T bitReverse(T n, size_t len) {
+    T res = 0;
+    size_t noBytes = len;
+    while(noBytes--) {
+        res = (res << 1) | (n & 1); // if least significant digit is 1, append to res and make room for next digit
+        n >>= 1; // shift right to check next least sig. digit
+    }
+    return res;
+}
+template size_t bitReverse(size_t, size_t);
+
+template<typename T>
+vector<complex<T>> vecToComplex(const vector<T> &vec) {
+    vector<complex<T>> res(vec.size());
+    std::transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
+    return res;
+}
+template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
+
 FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInverse(_isInverse),
-                                                                        sampling(std::move(_sampling)) {
+                                                                        sampling(std::move(_sampling)),
+                                                                        W(std::exp((complex<ldouble>(2.0 * M_PI / ldouble(
+                                                                                nearestPower2(sampling.sampleNo))) * complex<ldouble>{0, 1}))) {
     try {
         if (!isPower2(sampling.sampleNo)) { // reduce data to (nearest power of 2) samples
             auto oldSampleNo = sampling.sampleNo;
@@ -39,19 +75,6 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
     } catch (NonPower2Exception &exception) { exception.message(); }
 }
 
-/// Compute Fast Fourier Transform (FFT) of signal sampling
-/// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
-/// @param W - complex number describing rotation of angle (1/N) on complex unit circle
-/// @return Sets class field "transform" to a vector of complex numbers representing FFT of "sampling" field
-void FFTSolver::FFT() {
-    const auto &N = sampling.sampleNo;
-    const auto W = std::exp((complex<ldouble>(2.0 * M_PI / ldouble(N)) * complex<ldouble>{0, 1}));
-    auto data = vecToComplex(sampling.sampleData);
-    auto nArr = vector<size_t>(N);
-    std::iota(nArr.begin(), nArr.end(), 0);
-
-    transform = data;
-}
 
 void FFTSolver::computeRecFFT() {
     std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
@@ -70,11 +93,27 @@ void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform, const size_t &N)
             evens.emplace_back(currTransform[i]);
             odds.emplace_back(currTransform[i + 1]);
         }
-        auto N2 = N / 2;
+        auto N2 = N >> 1;
         recFFT(evens, N2);
         recFFT(odds, N2);
         for (int n = 0; n < N2; ++n) {
             currTransform.at(n) = evens.at(n) + (Wn(N, n) * odds.at(n)); // TODO optimize Wn
         }
     }
+}
+
+void FFTSolver::FFT() {
+    const auto &N = sampling.sampleNo;
+    transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
+    vector<complex<ldouble>> tmp;
+    auto Wn = complex<ldouble>{1,0};
+    for (auto currTransformSize = N ; currTransformSize != 1 ; currTransformSize >>= 1) {
+        tmp = transform;
+        for (auto i = 0, j = 0 ; i < N ; i += 2, ++j) {
+            Wn *= W;
+            transform.at(j) = tmp.at(i) + (Wn * tmp.at(i + 1));
+            transform.at(j + (N >> 1)) = tmp.at(i) - (Wn * tmp.at(i + 1));
+        }
+    }
+//    for (auto el : transform) cout << abs(el) << "\n";
 }
