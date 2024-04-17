@@ -26,9 +26,9 @@ public:
 
    FFTSolver(SignalSampling  _sampling, bool _isInverse);
 
-   void computeRecFFT();
+//   void computeRecFFT();
 
-   static void recFFT(vector<complex<ldouble>>&, const size_t&);
+//   static void recFFT(vector<complex<ldouble>>&, const size_t&);
 
 /// Compute Fast Fourier Transform (FFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
@@ -53,8 +53,6 @@ public:
 
 template<typename T>
 vector<complex<T>> vecToComplex(const vector<T>& vec);
-
-complex<ldouble> Wn(const size_t&, const size_t&);
 
 template<typename T>
 inline size_t bitLen(T n);

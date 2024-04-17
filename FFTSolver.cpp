@@ -4,10 +4,11 @@
 #include "complex"
 #include "vector"
 #include "iostream"
-#include "NonPower2Exception.h"
+#include "exceptions/NonPower2Exception.h"
 #include "format"
+#include "algorithm"
 
-using std::cout, std::stack, std::pair;
+using std::cout, std::pair, std::transform;
 typedef long double ldouble;
 
 size_t nearestPower2(size_t N) {
@@ -19,11 +20,6 @@ size_t nearestPower2(size_t N) {
 
 bool isPower2(const size_t &N) {
     return (N > 0 && ((N & (N - 1)) == 0));
-}
-
-
-complex<ldouble> Wn(const size_t &N, const size_t &n) { // TODO optimize
-    return std::exp((complex<ldouble>(2.0 * M_PI * ldouble(n) / ldouble(N)) * complex<ldouble>{0, 1}));
 }
 
 template<typename T>
@@ -55,14 +51,14 @@ template size_t bitReverse(size_t, size_t);
 template<typename T>
 vector<complex<T>> vecToComplex(const vector<T> &vec) {
     vector<complex<T>> res(vec.size());
-    std::transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
+    transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
     return res;
 }
 template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
 
 FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInverse(_isInverse),
                                                                         sampling(std::move(_sampling)),
-                                                                        W(std::exp((complex<ldouble>(2.0 * M_PI / ldouble(
+                                                                        W(std::exp((complex<ldouble>((_isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(
                                                                                 nearestPower2(sampling.sampleNo))) * complex<ldouble>{0, 1}))) {
     try {
         if (!isPower2(sampling.sampleNo)) { // reduce data to (nearest power of 2) samples
@@ -76,44 +72,43 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
 }
 
 
-void FFTSolver::computeRecFFT() {
-    std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
-    recFFT(transform, transform.size());
-    for (const auto &el: transform) { cout << el << " "; }
-}
+// void FFTSolver::computeRecFFT() {
+//     std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
+//     recFFT(transform, transform.size());
+// }
 
-void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform, const size_t &N) {
-    if (N == 2) {
-        auto tmp = currTransform[0];
-        currTransform.at(0) += currTransform.at(1);
-        currTransform.at(1) = tmp - currTransform.at(1);
-    } else {
-        vector<complex<ldouble>> evens, odds;
-        for (int i = 0; i < currTransform.size(); i += 2) {
-            evens.emplace_back(currTransform[i]);
-            odds.emplace_back(currTransform[i + 1]);
-        }
-        auto N2 = N >> 1;
-        recFFT(evens, N2);
-        recFFT(odds, N2);
-        for (int n = 0; n < N2; ++n) {
-            currTransform.at(n) = evens.at(n) + (Wn(N, n) * odds.at(n)); // TODO optimize Wn
-        }
-    }
-}
+// void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform, const size_t &N) {
+//     if (N == 2) {
+//         auto tmp = currTransform[0];
+//         currTransform.at(0) += currTransform.at(1);
+//         currTransform.at(1) = tmp - currTransform.at(1);
+//     } else {
+//         vector<complex<ldouble>> evens, odds;
+//         for (int i = 0; i < currTransform.size(); i += 2) {
+//             evens.emplace_back(currTransform[i]);
+//             odds.emplace_back(currTransform[i + 1]);
+//         }
+//         auto N2 = N >> 1;
+//         recFFT(evens, N2);
+//         recFFT(odds, N2);
+//         for (int n = 0; n < N2; ++n) {
+//             currTransform.at(n) = evens.at(n) + (Wn(N, n) * odds.at(n));
+//         }
+//     }
+// }
 
+// TODO multiply by (1/N) for IFFT
 void FFTSolver::FFT() {
     const auto &N = sampling.sampleNo;
     transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
-    vector<complex<ldouble>> tmp;
-    auto Wn = complex<ldouble>{1,0};
+    vector<complex<ldouble>> tmpTransform; // will save values of transform from previous iter
+    auto Wn = complex<ldouble>{1,0}; // W constant, multiplied to obtain W^n in each iter
     for (auto currTransformSize = N ; currTransformSize != 1 ; currTransformSize >>= 1) {
-        tmp = transform;
-        for (auto i = 0, j = 0 ; i < N ; i += 2, ++j) {
+        tmpTransform = transform;
+        for (auto i = 0, j = 0 ; i < N ; i += 2, ++j) { // use pair of adjacent points to get the transform
             Wn *= W;
-            transform.at(j) = tmp.at(i) + (Wn * tmp.at(i + 1));
-            transform.at(j + (N >> 1)) = tmp.at(i) - (Wn * tmp.at(i + 1));
+            transform.at(j) = tmpTransform.at(i) + (Wn * tmpTransform.at(i + 1));
+            transform.at(j + (N >> 1)) = tmpTransform.at(i) - (Wn * tmpTransform.at(i + 1)); // generate second half of data (Danielson-Lanczos symmetry formulas)
         }
     }
-//    for (auto el : transform) cout << abs(el) << "\n";
 }

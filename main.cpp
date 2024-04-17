@@ -6,8 +6,7 @@
 #include "vector"
 #include "SignalSampling.h"
 #include "FFTSolver.h"
-#include "NonPower2Exception.h"
-#include "format"
+#include "exceptions/NonPower2Exception.h"
 
 using std::ifstream, std::cout, std::string, std::vector;
 typedef long double ldouble;
