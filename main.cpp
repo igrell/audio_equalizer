@@ -25,21 +25,12 @@ SignalSampling parseAudiofile(const string& filename) {
     return {sampleRate, audioData};
 }
 
-void saveToFile(const FFTSolver& solver) {
-    std::ofstream file;
-    if(!file.is_open()) file.open("../fft_output.txt", std::ios::out);
-    file << solver;
-    file.close();
-
-}
-
 
 int main() {
     SignalSampling audio = parseAudiofile("../data.txt");
     SignalSampling test(4, vector<ldouble>{0,1,2,3,4,5});
     FFTSolver solver(audio, false);
     solver.FFT();
-    cout << solver;
     saveToFile(solver);
     return 0;
 }

@@ -7,8 +7,9 @@
 #include "cassert"
 #include "format"
 #include "iostream"
+#include "fstream"
 
-using std::vector, std::complex, std::ostream, std::cout;
+using std::vector, std::complex, std::ostream, std::cout, std::ofstream;
 typedef long double ldouble;
 
 size_t nearestPower2(size_t N);
@@ -39,6 +40,14 @@ public:
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {
         for (const auto& el : solver.transform) ostream << abs(el) << "\n";
         return ostream;
+    }
+
+    friend void saveToFile(const FFTSolver& solver) {
+        ofstream file;
+        if(!file.is_open()) file.open("../fft_output.txt", std::ios::out);
+        file << solver.sampling.sampleInterval << "\n";
+        file << solver;
+        file.close();
     }
 };
 
