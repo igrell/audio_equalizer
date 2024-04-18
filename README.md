@@ -7,4 +7,7 @@ This project implements an equalizer of audio signal on the human-perceivable sp
 * bash shell (default location: "/bin/bash")
 ## Usage
 Just run bash script:
+
     ./runAnalysis.sh
+
+
