@@ -12,4 +12,5 @@ echo 'Plotting results...'
 cd python_utils || exit
 python3 plotTransform.py
 cd ..
+rm a.out
 echo 'Plot saved to results/transform_plot.png'
