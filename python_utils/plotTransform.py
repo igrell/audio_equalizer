@@ -5,7 +5,7 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    inFile = open('../fft_output.txt')
+    inFile = open('../results/fft_output.txt')
     transformData = list(map(float, inFile.read().split()))
     sampleInterval = float(transformData[0])
     transformData = transformData[1:]
@@ -13,5 +13,5 @@ if __name__ == '__main__':
     t = np.arange(20, 20000, 19980 / len(transformData))
     plt.plot(t, transformData, color='purple')
     plt.xlabel('Frequency (Hz)')
-    plt.show()
-    plt.savefig('../transformPlot.png')
+    plt.savefig('../results/transformPlot.png')
+    # plt.show()

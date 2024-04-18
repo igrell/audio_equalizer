@@ -16,7 +16,8 @@ if __name__ == '__main__':
     audioLen = sampleNo / sampleRate
 
     if len(audioData.shape) == 1:  # if mono
-        outFile = open("../data.txt", "w")
+        outFilename = "../datafiles/data.txt"
+        outFile = open(outFilename, "w")
         outFile.write(str(sampleRate))
         outFile.write('\n')
         for i in range(0, sampleNo - 1):
@@ -42,7 +43,9 @@ if __name__ == '__main__':
         # plt.xlim(0, 10)
         # plt.show()
     elif len(audioData.shape) == 2:  # if stereo
-        outFileL, outFileR = open("../dataL.txt", "w"), open("../dataR.txt", "w")
+        outFilenameR = "../datafiles/dataR.txt"
+        outFilenameL = "../datafiles/dataL.txt"
+        outFileL, outFileR = open(outFilenameL, "w"), open(outFilenameR, "w")
         strSampleRate = str(sampleRate)
         outFileL.write(strSampleRate)
         outFileL.write('\n')
@@ -72,4 +75,4 @@ if __name__ == '__main__':
         # plt.xlabel('Time (s)')
         # plt.show()
     else:
-        print("Wrong data format")
+        print("Wrong datafiles format")

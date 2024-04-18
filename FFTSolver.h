@@ -42,13 +42,7 @@ public:
         return ostream;
     }
 
-    friend void saveToFile(const FFTSolver& solver) {
-        ofstream file;
-        if(!file.is_open()) file.open("../fft_output.txt", std::ios::out);
-        file << solver.sampling.sampleInterval << "\n";
-        file << solver;
-        file.close();
-    }
+    friend void saveToFile(const FFTSolver&);
 };
 
 template<typename T>

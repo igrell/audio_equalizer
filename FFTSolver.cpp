@@ -8,7 +8,7 @@
 #include "format"
 #include "algorithm"
 
-using std::cout, std::pair, std::transform;
+using std::cout, std::pair, std::transform, std::string;
 typedef long double ldouble;
 
 size_t nearestPower2(size_t N) {
@@ -61,7 +61,7 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
                                                                         W(std::exp((complex<ldouble>((_isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(
                                                                                 nearestPower2(sampling.sampleNo))) * complex<ldouble>{0, 1}))) {
     try {
-        if (!isPower2(sampling.sampleNo)) { // reduce data to (nearest power of 2) samples
+        if (!isPower2(sampling.sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampling.sampleNo;
             sampling.sampleNo = nearestPower2(sampling.sampleNo);
             sampling.sampleData.resize(sampling.sampleNo);
@@ -108,7 +108,16 @@ void FFTSolver::FFT() {
         for (auto i = 0, j = 0 ; i < N ; i += 2, ++j) { // use pair of adjacent points to get the transform
             Wn *= W;
             transform.at(j) = tmpTransform.at(i) + (Wn * tmpTransform.at(i + 1));
-            transform.at(j + (N >> 1)) = tmpTransform.at(i) - (Wn * tmpTransform.at(i + 1)); // generate second half of data (Danielson-Lanczos symmetry formulas)
+            transform.at(j + (N >> 1)) = tmpTransform.at(i) - (Wn * tmpTransform.at(i + 1)); // generate second half of datafiles (Danielson-Lanczos symmetry formulas)
         }
     }
+}
+
+void saveToFile(const FFTSolver &solver) {
+    ofstream file;
+    string outputFilename = "results/fft_output.txt";
+    if(!file.is_open()) file.open(outputFilename, std::ios::out);
+    file << solver.sampling.sampleInterval << "\n";
+    file << solver;
+    file.close();
 }
