@@ -24,7 +24,7 @@ SignalSampling parseAudiofile(const string& filename) {
 }
 
 
-int main(int argc, char *argv[]) {
+int main() {
     string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
     SignalSampling test(4, vector<ldouble>{0,1,2,3,4,5});

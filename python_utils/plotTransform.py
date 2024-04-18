@@ -5,7 +5,7 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    inFile = open('../results/transform_output.txt')
+    inFile = open('../results/transform_data.txt')
     transformData = list(map(float, inFile.read().split()))
     sampleInterval = float(transformData[0])
     transformData = transformData[1:]

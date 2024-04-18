@@ -115,7 +115,7 @@ void FFTSolver::FFT() {
 
 void saveToFile(const FFTSolver &solver) {
     ofstream file;
-    string outputFilename = "results/transform_output.txt";
+    string outputFilename = "results/transform_data.txt";
     if(!file.is_open()) file.open(outputFilename, std::ios::out);
     file << solver.sampling.sampleInterval << "\n";
     file << solver;

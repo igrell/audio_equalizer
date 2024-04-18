@@ -15,7 +15,7 @@ public:
     NonPower2Exception(const size_t& _sampleNo, const size_t& _newSampleNo) : sampleNo(_sampleNo), newSampleNo(_newSampleNo) {}
 
     void message() const {
-        cout << "\nWarning: number of samples (" << sampleNo << ") isn't a power of 2; reducing samples to the nearest power of 2 (2^" << log2(newSampleNo) << " = " << newSampleNo << ")\n";
+        cout << "Warning: number of samples (" << sampleNo << ") isn't a power of 2; reducing samples to the nearest power of 2 (2^" << log2(newSampleNo) << " = " << newSampleNo << ")\n";
     }
 };
 

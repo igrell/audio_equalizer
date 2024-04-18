@@ -1,9 +1,15 @@
 #!/bin/bash
+echo 'Parsing audio file to sampling format...'
 cd python_utils || exit
 python3 parseWav.py "${1}"
 cd ..
-g++ -std=c++2a SignalSampling.cpp FFTSolver.cpp exceptions/NonPower2Exception.h main.cpp
+g++ -std=c++2a SignalSampling.cpp FFTSolver.cpp main.cpp
+echo ''
+echo 'Performing FFT...'
 ./a.out 'data.txt'
+echo 'FFT sampling saved to results/transform_data.txt'
+echo 'Plotting results...'
 cd python_utils || exit
 python3 plotTransform.py
 cd ..
+echo 'Plot saved to results/transform_plot.png'
