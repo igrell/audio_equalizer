@@ -6,7 +6,7 @@ This project implements an equalizer of audio signal on the human-perceivable sp
 * python3 compiler
 * bash shell (default location: "/bin/bash")
 ## Usage
-Just run bash script:
+Just run bash script inside the project directory:
 
     ./runAnalysis.sh
 
