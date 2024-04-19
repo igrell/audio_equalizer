@@ -16,15 +16,7 @@ public:
     ldouble length;
     ldouble sampleInterval;
 
-    SignalSampling(const size_t _sampleRate, vector<ldouble> _sampleData) :
-            sampleData(std::move(_sampleData)),
-            sampleNo(sampleData.size()),
-            sampleRate(_sampleRate),
-            length(ldouble(sampleNo) / ldouble(sampleRate)),
-            sampleInterval(length / ldouble(sampleNo)) {
-        assert(_sampleRate != 0);
-        assert(!this->sampleData.empty());
-    }
+    SignalSampling(size_t _sampleRate, vector<ldouble> _sampleData);
 };
 
 ostream& operator<<(ostream&, const SignalSampling&);

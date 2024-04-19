@@ -8,6 +8,7 @@ echo ''
 echo 'Performing FFT...'
 ./a.out 'data.txt'
 echo 'FFT sampling saved to results/transform_data.txt'
+echo ''
 echo 'Plotting results...'
 cd python_utils || exit
 python3 plotTransform.py

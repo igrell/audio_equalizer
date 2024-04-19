@@ -30,7 +30,7 @@ template<typename T>
 vector<T> bitReversePermuteVec(const vector<T> &vec) {
     const auto &N = vec.size();
     vector<T> res = vec;
-    auto len = bitLen(N - 1); // get length suitable to 2^n
+    size_t len = bitLen(N - 1); // get length suitable to 2^n
     for (size_t i = 1 ; i < (N / 2) - 1 ; ++i) std::swap(res.at(i), res.at(bitReverse(i, len))); // edge indexes changed as edges never swap
     return res;
 }

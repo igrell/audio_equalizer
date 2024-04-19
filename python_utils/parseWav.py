@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     filename = '../sounds/' + sys.argv[1] + '.wav'
     sampleRate, audioData = wavfile.read(filename)
+    print('--------Loaded audio data---------')
     print('Filename:', sys.argv[1] + '.wav')
     print('Sampling Rate:', sampleRate)
     if (len(np.shape(audioData)) == 1):
@@ -14,6 +15,7 @@ if __name__ == '__main__':
     else:
         audioType = 'stereo'
     print('Audio type:', audioType)
+    print('----------------------------------')
 
     # number of samples
     sampleNo = audioData.shape[0]

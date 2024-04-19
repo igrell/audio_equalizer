@@ -27,8 +27,9 @@ SignalSampling parseAudiofile(const string& filename) {
 int main() {
     string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
-    SignalSampling test(4, vector<ldouble>{0,1,2,3,4,5});
     FFTSolver solver(audio, false);
+//    SignalSampling test(1, vector<ldouble>{0,1,0,1});
+//    FFTSolver solver(test, false);
     solver.FFT();
     saveToFile(solver);
     return 0;
