@@ -26,9 +26,9 @@ public:
 
    FFTSolver(SignalSampling  _sampling, bool _isInverse);
 
-//   void computeRecFFT();
+   void computeRecFFT();
 
-//   static void recFFT(vector<complex<ldouble>>&, const size_t&);
+    void recFFT(vector<complex<ldouble>>&);
 
 /// Compute Fast Fourier Transform (FFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
@@ -38,7 +38,8 @@ public:
 
 
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {
-        for (const auto& el : solver.transform) ostream << abs(el) << "\n";
+        for (auto it = solver.transform.begin() ; (it + 1) != solver.transform.end() ; it++) ostream << abs(*it) << "\n";
+        ostream << abs(solver.transform.back());
         return ostream;
     }
 

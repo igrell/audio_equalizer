@@ -1,48 +1,58 @@
 import numpy as np
-from numpy.fft import fft
 import matplotlib.pyplot as plt
 import math
 
+
+def parseDataFile(filename):
+    file = open(filename)
+    data = list(map(np.longdouble, file.read().split()))
+    param = data[0]
+    data = data[1:]
+    return [param, data]
+
+
 if __name__ == '__main__':
-    transformInFile = open('../results/transform_data.txt')
-    transformData = list(map(float, transformInFile.read().split()))
-    sampleInterval = float(transformData[0])
-    transformData = transformData[1:]
-    nyquistFreq = 1 / (2 * sampleInterval)
-    f = np.linspace(20, 20000, len(transformData)) # TODO fix the range of f
+    samplingInterval, transformData = parseDataFile('../results/transform_data.txt')
+    samplingNo = len(transformData)
 
-    signalInFile = open('../datafiles/data.txt')
-    signalData = list(map(float, signalInFile.read().split()))
-    signalSampleRate = signalData[0]
-    signalData = signalData[1:(len(f) + 1)]
-    signalSampleNo = len(signalData)
-    length = signalSampleNo / signalSampleRate
-    t = np.arange(0, length, sampleInterval)
-    freq = 440
-    noOfPeriods = 5
-    t_delim = noOfPeriods * math.floor(signalSampleNo / (freq * length))
-    # t_delim = len(t) - 1
+    samplingRate, signalData = parseDataFile('../datafiles/data.txt')
+    signalData = signalData[:samplingNo]  # cut data to the nearest power of 2
+    length = samplingNo / samplingRate
 
-    fftData = fft(signalData) / signalSampleNo
-    values = np.arange(int(signalSampleNo / 2))
-    timePeriod = signalSampleNo / signalSampleRate
-    fft_f = values / timePeriod
+    time = np.arange(0, length, samplingInterval)
+    # time = time[:len(time) - 1]  # TODO why is this needed??? WHYYYYYY??????
+    print(time)
 
-    plt.subplot(3, 1, 1)
-    plt.plot(t[:t_delim], signalData[:t_delim], color='blue')
-    plt.xlabel('Time [s]')
-    plt.ylabel('Signal value')
+    python_fft = np.fft.fft(signalData)
+    samplePoints = np.arange(samplingNo)
+    frequencies = samplePoints / length
 
-    plt.subplot(3, 1, 2)
-    plt.plot(f, transformData, color='purple')
-    plt.xlabel('Frequency [Hz]')
-    plt.ylabel('Own FT value')
-    plt.tight_layout()
+    figure, axis = plt.subplots(3, 1)
+    plt.subplots_adjust(hspace=2)
 
-    plt.subplot(3, 1, 3)
-    plt.plot(fft_f, abs(fftData), color='red')
-    plt.xlabel('Frequency [Hz]')
-    plt.ylabel('Python FT value')
-    plt.tight_layout()
+    # print(samplingInterval)
+    # print(time)
+    # print(signalData)
+    # print(frequencies)
+    print(abs(python_fft))
+
+    axis[0].set_title('Input signal')
+    axis[0].plot(time, signalData)
+    axis[0].set_xlabel('Time [s]')
+    axis[0].set_ylabel('Amplitude')
+
+    axis[1].set_title('Own FT')
+    axis[1].plot(frequencies[:2000], transformData[:2000])
+    axis[1].set_xlabel('Frequency [Hz]')
+    axis[1].set_ylabel('Amplitude')
+
+    axis[2].set_title('Python FT')
+    axis[2].plot(frequencies[:2000], abs(python_fft)[:2000])
+    axis[2].set_xlabel('Frequency [Hz]')
+    axis[2].set_ylabel('Amplitude')
+
     plt.savefig('../results/transform_plot.png')
-    # plt.show()
+    plt.show()
+
+    # for i in range(0, 2000):
+    #     print(abs(python_fft[i]))

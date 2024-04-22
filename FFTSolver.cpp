@@ -72,30 +72,32 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
 }
 
 
-// void FFTSolver::computeRecFFT() {
-//     std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
-//     recFFT(transform, transform.size());
-// }
+ void FFTSolver::computeRecFFT() {
+     std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
+     recFFT(transform);
+ }
 
-// void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform, const size_t &N) {
-//     if (N == 2) {
-//         auto tmp = currTransform[0];
-//         currTransform.at(0) += currTransform.at(1);
-//         currTransform.at(1) = tmp - currTransform.at(1);
-//     } else {
-//         vector<complex<ldouble>> evens, odds;
-//         for (int i = 0; i < currTransform.size(); i += 2) {
-//             evens.emplace_back(currTransform[i]);
-//             odds.emplace_back(currTransform[i + 1]);
-//         }
-//         auto N2 = N >> 1;
-//         recFFT(evens, N2);
-//         recFFT(odds, N2);
-//         for (int n = 0; n < N2; ++n) {
-//             currTransform.at(n) = evens.at(n) + (Wn(N, n) * odds.at(n));
-//         }
-//     }
-// }
+ void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform) {
+     size_t N = currTransform.size();
+     if (N == 1) return;
+     size_t N2 = N / 2;
+
+     vector<complex<ldouble>> evens;
+     vector<complex<ldouble>> odds;
+     for (size_t i = 0 ; i < N2 ; ++i) {
+         evens.emplace_back(currTransform[2 * i]);
+         odds.emplace_back(currTransform[2 * i + 1]);
+     }
+     recFFT(evens);
+     recFFT(odds);
+
+     complex<ldouble> Wn = {1, 0};
+     for (size_t i = 0 ; i != N2 ; ++i) {
+         currTransform[i] = evens[i] + (Wn * odds[i]);
+         currTransform[i + N2] = evens[i] - (Wn * odds[i]);
+        Wn *= W;
+     }
+ }
 
 // TODO multiply by (1/N) for IFFT
 void FFTSolver::FFT() {
@@ -103,7 +105,7 @@ void FFTSolver::FFT() {
     transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
     vector<complex<ldouble>> tmpTransform; // will save values of transform from previous iter
     auto Wn = complex<ldouble>{1,0}; // W constant, multiplied to obtain W^n in each iter
-    for (auto currTransformSize = N ; currTransformSize != 1 ; currTransformSize >>= 1) {
+    for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
         tmpTransform = transform;
         for (auto i = 0, j = 0 ; i < N ; i += 2, ++j) { // use pair of adjacent points to get the transform
             Wn *= W;
