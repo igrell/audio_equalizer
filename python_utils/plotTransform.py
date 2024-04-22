@@ -19,9 +19,9 @@ if __name__ == '__main__':
     signalData = signalData[:samplingNo]  # cut data to the nearest power of 2
     length = samplingNo / samplingRate
 
-    time = np.arange(0, length, samplingInterval)
-    # time = time[:len(time) - 1]  # TODO why is this needed??? WHYYYYYY??????
-    print(time)
+    time = np.linspace(0, length, samplingNo)
+    # time = np.arange(0, length, samplingInterval)
+    # print(time)
 
     python_fft = np.fft.fft(signalData)
     samplePoints = np.arange(samplingNo)
@@ -29,12 +29,6 @@ if __name__ == '__main__':
 
     figure, axis = plt.subplots(3, 1)
     plt.subplots_adjust(hspace=2)
-
-    # print(samplingInterval)
-    # print(time)
-    # print(signalData)
-    # print(frequencies)
-    print(abs(python_fft))
 
     axis[0].set_title('Input signal')
     axis[0].plot(time, signalData)
@@ -55,4 +49,4 @@ if __name__ == '__main__':
     plt.show()
 
     # for i in range(0, 2000):
-    #     print(abs(python_fft[i]))
+    #     print(abs(python_fft[i])

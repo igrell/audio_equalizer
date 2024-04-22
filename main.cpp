@@ -30,7 +30,8 @@ int main() {
     FFTSolver solver(audio, false);
 //    SignalSampling test(1, vector<ldouble>{0,1,0,1});
 //    FFTSolver solver(test, false);
-    solver.computeRecFFT();
+//    solver.computeRecFFT();
+    solver.FFT();
     saveToFile(solver);
     return 0;
 }

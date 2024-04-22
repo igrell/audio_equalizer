@@ -20,7 +20,6 @@ class FFTSolver {
     SignalSampling sampling;
     const bool isInverse;
     vector<complex<ldouble>> transform;
-    const complex<ldouble> W;
 
 public:
 

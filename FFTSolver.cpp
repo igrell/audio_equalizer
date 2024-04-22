@@ -57,9 +57,7 @@ vector<complex<T>> vecToComplex(const vector<T> &vec) {
 template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
 
 FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInverse(_isInverse),
-                                                                        sampling(std::move(_sampling)),
-                                                                        W(std::exp((complex<ldouble>((_isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(
-                                                                                nearestPower2(sampling.sampleNo))) * complex<ldouble>{0, 1}))) {
+                                                                        sampling(std::move(_sampling)) {
     try {
         if (!isPower2(sampling.sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampling.sampleNo;
@@ -74,43 +72,52 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
 
  void FFTSolver::computeRecFFT() {
      std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
+     vector<complex<ldouble>> evens, odds;
+     complex<ldouble> W, Wn, oddFactor;
      recFFT(transform);
  }
 
  void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform) {
-     size_t N = currTransform.size();
-     if (N == 1) return;
-     size_t N2 = N / 2;
+     const size_t& N = currTransform.size();
+     if (N < 2) return;
+     size_t N2 = N >> 1;
 
-     vector<complex<ldouble>> evens;
-     vector<complex<ldouble>> odds;
+     vector<complex<ldouble>> evens, odds;
      for (size_t i = 0 ; i < N2 ; ++i) {
          evens.emplace_back(currTransform[2 * i]);
-         odds.emplace_back(currTransform[2 * i + 1]);
+         odds.emplace_back(currTransform[(2 * i) + 1]);
      }
+
      recFFT(evens);
      recFFT(odds);
 
+     complex<ldouble> W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
      complex<ldouble> Wn = {1, 0};
-     for (size_t i = 0 ; i != N2 ; ++i) {
-         currTransform[i] = evens[i] + (Wn * odds[i]);
-         currTransform[i + N2] = evens[i] - (Wn * odds[i]);
-        Wn *= W;
+     complex<ldouble> oddFactor;
+     for (size_t k = 0 ; k != N2 ; ++k) {
+         oddFactor = Wn * odds[k];
+         currTransform[k] = evens[k] + oddFactor;
+         currTransform[k + N2] = evens[k] - oddFactor;
+         Wn *= W;
      }
  }
 
 // TODO multiply by (1/N) for IFFT
 void FFTSolver::FFT() {
-    const auto &N = sampling.sampleNo;
-    transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
+    complex<ldouble> oddFactor, W, Wn;
     vector<complex<ldouble>> tmpTransform; // will save values of transform from previous iter
-    auto Wn = complex<ldouble>{1,0}; // W constant, multiplied to obtain W^n in each iter
+    const size_t &N = sampling.sampleNo;
+    const size_t N2 = N >> 1;
+    transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
     for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
         tmpTransform = transform;
-        for (auto i = 0, j = 0 ; i < N ; i += 2, ++j) { // use pair of adjacent points to get the transform
+        W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
+        for (auto i = 0, k = 0 ; i < N ; i += 2, ++k) { // use pair of adjacent points to get the transform
+            oddFactor = Wn * tmpTransform[i + 1];
+            transform[k] = tmpTransform[i] + oddFactor;
+            transform[k + N2] = tmpTransform[i] - oddFactor; // generate second half of datafiles (Danielson-Lanczos symmetry formulas)
             Wn *= W;
-            transform.at(j) = tmpTransform.at(i) + (Wn * tmpTransform.at(i + 1));
-            transform.at(j + (N >> 1)) = tmpTransform.at(i) - (Wn * tmpTransform.at(i + 1)); // generate second half of datafiles (Danielson-Lanczos symmetry formulas)
         }
     }
 }
