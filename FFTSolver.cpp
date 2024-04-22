@@ -109,6 +109,20 @@ void FFTSolver::FFT() {
     const size_t &N = sampling.sampleNo;
     const size_t N2 = N >> 1;
     transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
+
+//    for (auto transformLen = 2 ; transformLen != N ; transformLen <<= 1) {
+//        tmpTransform = transform;
+//        W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+//        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
+//        for(auto i = 0 ; i < N2 ; i += 2) {
+//            oddFactor = Wn * tmpTransform[i + 1];
+//            tmpTransform[i] = tmpTransform[i] + oddFactor;
+//            tmpTransform[i + N2] = tmpTransform[i] - oddFactor;
+//            Wn *= W;
+//        }
+//    }
+
+
     for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
         tmpTransform = transform;
         W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
