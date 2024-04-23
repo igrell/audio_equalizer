@@ -11,4 +11,5 @@ Just run bash script inside the project directory, with `audiofile` being the na
 
     ./runAnalysis.sh audiofile
 
-
+## Note
+This project was written as a part of a thesis for Bachelor's Degree in Computational Mathematics at Jagiellonian University in Kraków.
