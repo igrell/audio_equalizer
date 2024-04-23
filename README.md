@@ -7,8 +7,8 @@ This project uses C++20 and Python 3, and as such will require:
 * python3 compiler
 * bash shell (default location: "/bin/bash")
 ## Usage
-Just run bash script inside the project directory:
+Just run bash script inside the project directory, with `audiofile` being the name of a `.wav` file in the `sounds` directory:
 
-    ./runAnalysis.sh
+    ./runAnalysis.sh audiofile
 
 
