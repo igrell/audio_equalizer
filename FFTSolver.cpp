@@ -56,24 +56,24 @@ vector<complex<T>> vecToComplex(const vector<T> &vec) {
 }
 template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
 
-FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInverse(_isInverse),
-                                                                        sampling(std::move(_sampling)) {
+FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInverse(_isInverse) {
+    data = vecToComplex(_sampling.sampleData);
+//    std::copy(_sampling.sampleData.begin(), _sampling.sampleData.end(), std::back_inserter(data));
+    auto sampleNo = data.size();
+    param = isInverse ? _sampling.sampleRate : _sampling.sampleInterval;
     try {
-        if (!isPower2(sampling.sampleNo)) { // reduce datafiles to (nearest power of 2) samples
-            auto oldSampleNo = sampling.sampleNo;
-            sampling.sampleNo = nearestPower2(sampling.sampleNo);
-            sampling.sampleData.resize(sampling.sampleNo);
-            sampling.length = ldouble(sampling.sampleNo) / ldouble(sampling.sampleRate);
-            throw NonPower2Exception(oldSampleNo, sampling.sampleNo);
+        if (!isPower2(sampleNo)) { // reduce datafiles to (nearest power of 2) samples
+            auto oldSampleNo = sampleNo;
+            sampleNo = nearestPower2(sampleNo);
+            data.resize(sampleNo);
+            throw NonPower2Exception(oldSampleNo, sampleNo);
         }
     } catch (NonPower2Exception &exception) { exception.message(); }
 }
 
+FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(_data), isInverse(_isInverse), param(_param) {}
 
- void FFTSolver::computeRecFFT() {
-     std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
-     recFFT(transform);
- }
+ void FFTSolver::computeRecFFT() { recFFT(data); }
 
  void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform) {
      const size_t& N = currTransform.size();
@@ -94,22 +94,23 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
      complex<ldouble> oddFactor;
      for (size_t k = 0 ; k != N2 ; ++k) {
          oddFactor = Wn * odds[k];
-         currTransform[k] = evens[k] + oddFactor;
+         currTransform[k] = (evens[k] + oddFactor);
          currTransform[k + N2] = evens[k] - oddFactor;
          Wn *= W;
      }
+//     for (auto& el : currTransform) { el *= (1 / N); }
  }
 
 // TODO multiply by (1/N) for IFFT
 void FFTSolver::FFT() {
     complex<ldouble> oddFactor, W, Wn;
-    vector<complex<ldouble>> tmpTransform; // will save values of transform from previous iter
-    const size_t &N = sampling.sampleNo;
+    vector<complex<ldouble>> tmpTransform; // will save values of data from previous iter
+    const size_t &N = data.size();
     const size_t N2 = N >> 1;
-    transform = bitReversePermuteVec(vecToComplex(sampling.sampleData));
+    data = bitReversePermuteVec(data);
 
 //    for (auto transformLen = 2 ; transformLen != N ; transformLen <<= 1) {
-//        tmpTransform = transform;
+//        tmpTransform = data;
 //        W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
 //        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
 //        for(auto i = 0 ; i < N2 ; i += 2) {
@@ -122,13 +123,13 @@ void FFTSolver::FFT() {
 
 
     for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
-        tmpTransform = transform;
+        tmpTransform = data;
         W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
         Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
-        for (auto i = 0, k = 0 ; i < N ; i += 2, ++k) { // use pair of adjacent points to get the transform
+        for (auto i = 0, k = 0 ; i < N ; i += 2, ++k) { // use pair of adjacent points to get the data
             oddFactor = Wn * tmpTransform[i + 1];
-            transform[k] = tmpTransform[i] + oddFactor;
-            transform[k + N2] = tmpTransform[i] - oddFactor; // generate second half of datafiles (Danielson-Lanczos symmetry formulas)
+            data[k] = tmpTransform[i] + oddFactor;
+            data[k + N2] = tmpTransform[i] - oddFactor; // generate second half of datafiles (Danielson-Lanczos symmetry formulas)
             Wn *= W;
         }
     }
@@ -138,11 +139,11 @@ void saveToFile(const FFTSolver &solver) {
     ofstream file;
     string outputFilename = "results/transform_data.txt";
     if(!file.is_open()) file.open(outputFilename, std::ios::out);
-    file << solver.sampling.sampleInterval << "\n";
+    file << solver.param << "\n";
     file << solver;
     file.close();
 }
 
-FFTSolver::FFTSolver(vector<complex<ldouble>> , bool) {
+vector<complex<ldouble>> FFTSolver::getData() const { return data; }
 
-}
+

@@ -32,7 +32,10 @@ int main() {
 //    FFTSolver solver(test, false);
     solver.computeRecFFT();
 //    solver.FFT();
-    saveToFile(solver);
+//    saveToFile(solver);
+    FFTSolver isolver(solver.getData(), true, audio.sampleRate);
+    isolver.computeRecFFT();
+    saveToFile(isolver);
     return 0;
 }
 
