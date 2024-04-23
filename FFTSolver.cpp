@@ -73,7 +73,10 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
 
 FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(_data), isInverse(_isInverse), param(_param) {}
 
- void FFTSolver::computeRecFFT() { recFFT(data); }
+ void FFTSolver::computeRecFFT() {
+    if (isInverse) for (auto& el : data) { el /= data.size(); }
+    recFFT(data);
+}
 
  void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform) {
      const size_t& N = currTransform.size();
@@ -98,7 +101,6 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
          currTransform[k + N2] = evens[k] - oddFactor;
          Wn *= W;
      }
-//     for (auto& el : currTransform) { el *= (1 / N); }
  }
 
 // TODO multiply by (1/N) for IFFT
@@ -137,7 +139,7 @@ void FFTSolver::FFT() {
 
 void saveToFile(const FFTSolver &solver) {
     ofstream file;
-    string outputFilename = "results/transform_data.txt";
+    string outputFilename = solver.isInverse ? "results/ifft_data.txt" : "results/fft_data.txt";
     if(!file.is_open()) file.open(outputFilename, std::ios::out);
     file << solver.param << "\n";
     file << solver;

@@ -12,8 +12,10 @@ def parseDataFile(filename):
 
 
 if __name__ == '__main__':
-    samplingInterval, transformData = parseDataFile('../results/transform_data.txt')
-    samplingNo = len(transformData)
+    samplingInterval, fftData = parseDataFile('../results/fft_data.txt')
+    samplingNo = len(fftData)
+
+    tmp, ifftData = parseDataFile('../results/ifft_data.txt')
 
     samplingRate, signalData = parseDataFile('../datafiles/data.txt')
     signalData = signalData[:samplingNo]  # cut data to the nearest power of 2
@@ -23,12 +25,15 @@ if __name__ == '__main__':
     # time = np.arange(0, length, samplingInterval)
     # print(time)
 
-    python_fft = np.fft.fft(signalData)
+    pythonFft = np.fft.fft(signalData)
     samplePoints = np.arange(samplingNo)
     frequencies = samplePoints / length
 
-    figure, axis = plt.subplots(3, 1)
-    plt.subplots_adjust(hspace=2)
+    pythonIfft = np.fft.ifft(pythonFft)
+
+
+    figure, axis = plt.subplots(5, 1)
+    plt.subplots_adjust(hspace=3)
 
     axis[0].set_title('Input signal')
     axis[0].plot(time, signalData)
@@ -36,14 +41,24 @@ if __name__ == '__main__':
     axis[0].set_ylabel('Amplitude')
 
     axis[1].set_title('Own FT')
-    axis[1].plot(frequencies[:2000], transformData[:2000])
+    axis[1].plot(time[:2000], fftData[:2000])
     axis[1].set_xlabel('Frequency [Hz]')
     axis[1].set_ylabel('Amplitude')
 
     axis[2].set_title('Python FT')
-    axis[2].plot(frequencies[:2000], abs(python_fft)[:2000])
+    axis[2].plot(frequencies[:2000], abs(pythonFft)[:2000])
     axis[2].set_xlabel('Frequency [Hz]')
     axis[2].set_ylabel('Amplitude')
+
+    axis[3].set_title('Own IFT')
+    axis[3].plot(time[:2000], ifftData[:2000])
+    axis[3].set_xlabel('Time [s]')
+    axis[3].set_ylabel('Amplitude')
+
+    axis[4].set_title('Python IFT')
+    axis[4].plot(time[:2000], pythonIfft[:2000])
+    axis[4].set_xlabel('Time [s]')
+    axis[4].set_ylabel('Amplitude')
 
     plt.savefig('../results/transform_plot.png')
     plt.show()
