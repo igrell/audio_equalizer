@@ -72,8 +72,6 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
 
  void FFTSolver::computeRecFFT() {
      std::copy(sampling.sampleData.begin(), sampling.sampleData.end(), std::back_inserter(transform));
-     vector<complex<ldouble>> evens, odds;
-     complex<ldouble> W, Wn, oddFactor;
      recFFT(transform);
  }
 
@@ -143,4 +141,8 @@ void saveToFile(const FFTSolver &solver) {
     file << solver.sampling.sampleInterval << "\n";
     file << solver;
     file.close();
+}
+
+FFTSolver::FFTSolver(vector<complex<ldouble>> , bool) {
+
 }

@@ -23,7 +23,9 @@ class FFTSolver {
 
 public:
 
-   FFTSolver(SignalSampling  _sampling, bool _isInverse);
+   FFTSolver(SignalSampling, bool);
+
+   FFTSolver(vector<complex<ldouble>>, bool);
 
    void computeRecFFT();
 
