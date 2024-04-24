@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 
 
 def parseDataFile(filename):
@@ -41,22 +40,22 @@ if __name__ == '__main__':
     axis[0].set_ylabel('Amplitude')
 
     axis[1].set_title('Own FT')
-    axis[1].plot(time[:2000], fftData[:2000])
+    axis[1].plot(frequencies, fftData)
     axis[1].set_xlabel('Frequency [Hz]')
     axis[1].set_ylabel('Amplitude')
 
     axis[2].set_title('Python FT')
-    axis[2].plot(frequencies[:2000], abs(pythonFft)[:2000])
+    axis[2].plot(frequencies, abs(pythonFft))
     axis[2].set_xlabel('Frequency [Hz]')
     axis[2].set_ylabel('Amplitude')
 
     axis[3].set_title('Own IFT')
-    axis[3].plot(time[:2000], ifftData[:2000])
+    axis[3].plot(time, ifftData)
     axis[3].set_xlabel('Time [s]')
     axis[3].set_ylabel('Amplitude')
 
     axis[4].set_title('Python IFT')
-    axis[4].plot(time[:2000], pythonIfft[:2000])
+    axis[4].plot(time, pythonIfft)
     axis[4].set_xlabel('Time [s]')
     axis[4].set_ylabel('Amplitude')
 

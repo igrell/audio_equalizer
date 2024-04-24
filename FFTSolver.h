@@ -17,9 +17,9 @@ size_t nearestPower2(size_t N);
 bool isPower2(const size_t& N);
 
 /// @class  FFTSolver
-/// @param isInverse Indicates whether an instance of FFTSolver will be used to calculate FFT or IFFT
-/// @param param parameter useful for plotting; samplingInterval for FFT, samplingRate for IFFT
-/// @param data input of FFT/IFFT algorithm; filled either with signal sampling or FT points to be reversed by IFFT during class construction
+/// @param isInverse Indicates whether an instance of FFTSolver will be used to calculate iterFFT or IFFT
+/// @param param parameter useful for plotting; samplingInterval for iterFFT, samplingRate for IFFT
+/// @param data input of iterFFT/IFFT algorithm; filled either with signal sampling or FT points to be reversed by IFFT during class construction
 class FFTSolver {
     vector<complex<ldouble>> data;
     const bool isInverse;
@@ -31,15 +31,15 @@ public:
 
    FFTSolver(vector<complex<ldouble>>, bool, ldouble);
 
-   void computeRecFFT();
+   void recFFT();
 
-    void recFFT(vector<complex<ldouble>>&);
+    void recFFTStep(vector<complex<ldouble>> &currTransform);
 
-/// Compute Fast Fourier Transform (FFT) of signal sampling
+/// Compute Fast Fourier Transform (iterFFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
 /// @param W - complex number describing rotation of angle (1/N) on complex unit circle
-/// @return Sets class field "data" to a vector of complex numbers representing FFT of "sampling" field
-   void FFT();
+/// @return Sets class field "data" to a vector of complex numbers representing iterFFT of "sampling" field
+   void iterFFT();
 
 
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {

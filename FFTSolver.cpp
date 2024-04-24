@@ -73,12 +73,12 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
 
 FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(_data), isInverse(_isInverse), param(_param) {}
 
- void FFTSolver::computeRecFFT() {
+ void FFTSolver::recFFT() {
     if (isInverse) for (auto& el : data) { el /= data.size(); }
-    recFFT(data);
+     recFFTStep(data);
 }
 
- void FFTSolver::recFFT(vector<complex<ldouble>> &currTransform) {
+ void FFTSolver::recFFTStep(vector<complex<ldouble>> &currTransform) {
      const size_t& N = currTransform.size();
      if (N < 2) return;
      size_t N2 = N >> 1;
@@ -89,8 +89,8 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
          odds.emplace_back(currTransform[(2 * i) + 1]);
      }
 
-     recFFT(evens);
-     recFFT(odds);
+     recFFTStep(evens);
+     recFFTStep(odds);
 
      complex<ldouble> W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
      complex<ldouble> Wn = {1, 0};
@@ -104,7 +104,7 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
  }
 
 // TODO multiply by (1/N) for IFFT
-void FFTSolver::FFT() {
+void FFTSolver::iterFFT() {
     complex<ldouble> oddFactor, W, Wn;
     vector<complex<ldouble>> tmpTransform; // will save values of data from previous iter
     const size_t &N = data.size();

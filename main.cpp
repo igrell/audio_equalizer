@@ -28,11 +28,11 @@ int main() {
     string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
     FFTSolver solver(audio, false);
-    solver.computeRecFFT();
-//    solver.FFT();
-    saveToFile(solver);
+    solver.recFFT();
+//    solver.iterFFT();
     FFTSolver isolver(solver.getData(), true, audio.sampleRate);
-    isolver.computeRecFFT();
+    isolver.recFFT();
+    saveToFile(solver);
     saveToFile(isolver);
     return 0;
 }
