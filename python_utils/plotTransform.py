@@ -35,12 +35,12 @@ if __name__ == '__main__':
     plt.subplots_adjust(hspace=3)
 
     axis[0].set_title('Input signal')
-    axis[0].plot(time, signalData)
+    axis[0].plot(time[:2000], signalData[:2000])
     axis[0].set_xlabel('Time [s]')
     axis[0].set_ylabel('Amplitude')
 
     axis[1].set_title('Own FT')
-    axis[1].plot(frequencies, fftData)
+    axis[1].plot(frequencies[:2000], fftData[:2000])
     axis[1].set_xlabel('Frequency [Hz]')
     axis[1].set_ylabel('Amplitude')
 
