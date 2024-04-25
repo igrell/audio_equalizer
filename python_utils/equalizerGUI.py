@@ -9,9 +9,15 @@ def openURL():
     webbrowser.open('https://github.com/igrell/audio_equalizer')
 
 
-def getFreqRanges(scalesNo):
+def getFreqRanges(bandsNo):
     freqMin, freqMax = 20, 20000
-    freqRanges = np.linspace(freqMin, freqMax, scalesNo + 1)  # TODO correct by appropriate function
+    if bandsNo == 10:  # ISO standard for 10 bands
+        freqRanges = [20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20000]
+    elif bandsNo == 31:  # ISO standard for 31 bands
+        freqRanges = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+                      2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
+    else:
+        freqRanges = np.linspace(freqMin, freqMax, bandsNo + 1)  # if no standard applies, make bandwidth constant
     return freqRanges
 
 
@@ -29,16 +35,16 @@ def correlateValues(scale, inputField):
 
 if __name__ == '__main__':
     # Constants
-    scalesNo = 10
+    bandsNo = 10
     amplifyFrom = 12
     amplifyTo = -12
     freqMin = 20
     freqMax = 20000
-    window_width = int((78 * scalesNo))  # scale window according to scalesNo; TODO improve
+    window_width = int((78 * bandsNo))  # scale window according to bandsNo; TODO improve
     window_height = 400
 
     window = tk.Tk()
-    window.title('Equalizer')
+    window.title('Very cool equalizer')
 
     # Set up window icon
     ico = Image.open('equalizer_icon.png')
@@ -75,7 +81,7 @@ if __name__ == '__main__':
     inputFields = []
     labels = []
 
-    for i in range(0, scalesNo):
+    for i in range(0, bandsNo):
         sliderVar = tk.DoubleVar(value=0.0)
         scale = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150, showvalue=True)
         inputField = Entry(window, width=4, textvariable=sliderVar)
@@ -84,7 +90,7 @@ if __name__ == '__main__':
         inputFields.append(inputField)
 
     # Frequency ranges for sliders
-    freqRanges = np.linspace(freqMin, freqMax, scalesNo + 1)  # TODO correct by appropriate function
+    freqRanges = getFreqRanges(bandsNo)
     for i in range(0, len(freqRanges) - 1):
         labelUpVar, labelDownVar = StringVar(), StringVar()
         labelUp = Label(window, textvariable=labelUpVar)
@@ -94,13 +100,11 @@ if __name__ == '__main__':
         labels.append([labelUp, labelDown])
 
     # Grid sliders
-    for i in range(0, scalesNo):
+    for i in range(0, bandsNo):
         labels[i][0].grid(row=0, column=i)
         sliders[i].grid(row=1, column=i, padx=10)
         inputFields[i].grid(row=2, column=i)
         labels[i][1].grid(row=3, column=i)
-
-    print(sliders[2].get())
 
     # Set constant window size
     window.minsize(window_width, window_height)
