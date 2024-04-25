@@ -71,17 +71,26 @@ def playAudio():  # TODO show 'play' again when audio finishes
 def equalize():
     pass
 
+def getSliderWidth(_slidersNo):
+    if _slidersNo == 31:
+        return 7
+    else:
+        return 15
 
 
 if __name__ == '__main__':
     # Constants
     slidersNo = 10
+    sliderWidth = getSliderWidth(slidersNo)
+    scaleWidth = sliderWidth + 100  # adds width of the counter
     amplifyFrom = 12
     amplifyTo = -12
     freqMin = 20
     freqMax = 20000
-    window_width = int((78 * slidersNo))  # scale window according to bandsNo; TODO improve
-    window_height = 400
+    windowWidth = 1000
+    windowHeight = 400
+    sliderPadX = 15
+    # sliderPadX = 0.5 * ((windowWidth / slidersNo) - scaleWidth)  # TODO
 
     # Initiate pygame mixer
     mixer.init()
@@ -90,8 +99,8 @@ if __name__ == '__main__':
     window.title('Very cool equalizer')
 
     # Set constant window size
-    window.minsize(window_width, window_height)
-    window.maxsize(window_width, window_height)
+    window.minsize(windowWidth, windowHeight)
+    window.maxsize(windowWidth, windowHeight)
 
     # Variables
     audiofilename = tk.StringVar()
@@ -134,13 +143,14 @@ if __name__ == '__main__':
     inputFields = []
     labels = []
 
+    # Initialize sliders
     for i in range(0, slidersNo):
         sliderVar = tk.DoubleVar(value=0.0)
-        scale = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
-                      showvalue=True)
+        slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
+                       width=sliderWidth, showvalue=True)
         inputField = Entry(window, width=4, textvariable=sliderVar)
-        scale.set((amplifyFrom + amplifyTo) / 2)
-        sliders.append(scale)
+        slider.set((amplifyFrom + amplifyTo) / 2)
+        sliders.append(slider)
         inputFields.append(inputField)
 
     # Frequency ranges for sliders
@@ -153,18 +163,17 @@ if __name__ == '__main__':
         labelDownVar.set(getLabelName(freqRanges[i + 1]))
         labels.append([labelUp, labelDown])
 
-    # Grid sliders
-    for i in range(0, slidersNo):
-        labels[i][0].grid(row=0, column=i)
-        sliders[i].grid(row=1, column=i, padx=10)
-        inputFields[i].grid(row=2, column=i)
-        labels[i][1].grid(row=3, column=i)
-
     # Lower part of the GUI
     text = Label(window, textvariable=audiofilename)
     playButton = Button(window, text='Play', command=playAudio)
     equalizeButton = Button(window, text='Apply changes', command=equalize)
 
+    # Grid everything
+    for i in range(0, slidersNo):
+        labels[i][0].grid(row=0, column=i)
+        sliders[i].grid(row=1, column=i, padx=sliderPadX)
+        inputFields[i].grid(row=2, column=i)
+        labels[i][1].grid(row=3, column=i)
     text.grid(row=4, column=0, columnspan=(slidersNo - 3))
     playButton.grid(row=4, column=(slidersNo - 3))
     equalizeButton.grid(row=4, column=(slidersNo - 2), columnspan=2)
