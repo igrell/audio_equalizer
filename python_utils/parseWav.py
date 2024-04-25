@@ -5,8 +5,8 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    filename = '../sounds/' + sys.argv[1] + '.wav'
-    sampleRate, audioData = wavfile.read(filename)
+    audioFilename = '../sounds/' + sys.argv[1] + '.wav'
+    sampleRate, audioData = wavfile.read(audioFilename)
     print('--------Loaded audio data---------')
     print('Filename:', sys.argv[1] + '.wav')
     print('Sampling Rate:', sampleRate)

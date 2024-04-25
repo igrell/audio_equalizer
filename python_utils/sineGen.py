@@ -38,5 +38,5 @@ if __name__ == '__main__':
         m = np.max(np.abs(waves[i]))
         waves[i] = maxint16 * waves[i] / m
         waves[i] = waves[i].astype(np.int16)
-        filename = "../sounds/sine" + str(i) + ".wav"
-        wavfile.write(filename, sampleRate, waves[i])
+        audioFilename = "../sounds/sine" + str(i) + ".wav"
+        wavfile.write(audioFilename, sampleRate, waves[i])
