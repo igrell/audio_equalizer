@@ -89,7 +89,7 @@ if __name__ == '__main__':
     freqMax = 20000
     windowWidth = 1000
     windowHeight = 400
-    sliderPadX = 15
+    sliderPadX = 20
     # sliderPadX = 0.5 * ((windowWidth / slidersNo) - scaleWidth)  # TODO
 
     # Initiate pygame mixer
