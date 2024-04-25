@@ -42,15 +42,15 @@ def correlateValues(scale, inputField):
 
 
 def loadAudioFile(event=None):
-    audioFilename.set(fd.askopenfilename())
-    if audioFilename.get() != '':
-        filetype = audioFilename.get().split('.')[1]
+    audiofilename.set(fd.askopenfilename())
+    if audiofilename.get() != '':
+        filetype = audiofilename.get().split('.')[1]
         if filetype != 'wav':
             print('Wrong filetype! Please insert a WAV file')
             return None
         else:
-            print('Loaded audio file: ', audioFilename.get().split('/')[-1])
-            return audioFilename
+            print('Loaded audio file: ', audiofilename.get().split('/')[-1])
+            return audiofilename
 
 
 def quitApp(event=None):  # TODO this needn't be here
@@ -58,7 +58,7 @@ def quitApp(event=None):  # TODO this needn't be here
 
 
 def playAudio():  # TODO show 'play' again when audio finishes
-    mixer.music.load(audioFilename.get())
+    mixer.music.load(audiofilename.get())
     if playButton["text"] == "Play":
         playButton["text"] = "Pause"
         mixer.music.play()
@@ -69,6 +69,7 @@ def playAudio():  # TODO show 'play' again when audio finishes
     # playsound(audioFilename.get())
 
 def equalize():
+    pass
 
 
 
@@ -93,7 +94,8 @@ if __name__ == '__main__':
     window.maxsize(window_width, window_height)
 
     # Variables
-    audioFilename = tk.StringVar()
+    audiofilename = tk.StringVar()
+    audiodata = []
 
     # Set up window icon
     ico = Image.open('equalizer_icon.png')
@@ -159,11 +161,11 @@ if __name__ == '__main__':
         labels[i][1].grid(row=3, column=i)
 
     # Lower part of the GUI
-    text = Label(window, textvariable=audioFilename)
+    text = Label(window, textvariable=audiofilename)
     playButton = Button(window, text='Play', command=playAudio)
     equalizeButton = Button(window, text='Apply changes', command=equalize)
 
-    text.grid(row=4, column=0, columnspan=(slidersNo - 2))
+    text.grid(row=4, column=0, columnspan=(slidersNo - 3))
     playButton.grid(row=4, column=(slidersNo - 3))
     equalizeButton.grid(row=4, column=(slidersNo - 2), columnspan=2)
 
