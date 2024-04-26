@@ -19,19 +19,23 @@ class AudioParser:
         print('Audio type:', self.audioType)
         print('----------------------------------')
 
+    # Parses wav file to sampling, saves to a text file and returns data as a string
     def parseAudioToSampling(self):
+        samplingData = ''
         if len(self.audioData.shape) == 1:  # if mono
             outFilename = "../datafiles/data.txt"
-            outFile = open(outFilename, "w")
-            outFile.write(str(self.samplingRate))
-            outFile.write('\n')
+            samplingData += str(self.samplingRate)
+            samplingData += '\n'
             for i in range(0, self.samplingNo - 1):
-                outFile.write(str(self.audioData[i]))
-                outFile.write('\n')
-            outFile.write(str(self.audioData[self.samplingNo - 1]))
+                samplingData += str(self.audioData[i])
+                samplingData += '\n'
+            samplingData += str(self.audioData[self.samplingNo - 1])
+            outFile = open(outFilename, "w")
+            outFile.write(samplingData)
             outFile.close()
         else:
             print("Wrong audio file format")
+        return samplingData
         # if len(self.audioData.shape) == 2:  # if stereo
         #     outFilenameR = "../datafiles/dataR.txt"
         #     outFilenameL = "../datafiles/dataL.txt"
