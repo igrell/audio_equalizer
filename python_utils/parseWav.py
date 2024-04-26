@@ -9,6 +9,7 @@ class AudioParser:
         self.samplingRate, self.audioData = wavfile.read(self.audioFilename)
         self.samplingNo = self.audioData.shape[0]
         self.audioLen = self.samplingNo / self.samplingRate
+
         print('--------Loaded audio data---------')
         print('Filename:', _audioFilename + '.wav')
         print('Sampling Rate:', self.samplingRate)

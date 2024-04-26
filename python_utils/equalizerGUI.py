@@ -1,4 +1,6 @@
+# TODO handle all empty files button clicks
 import os
+import subprocess
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog as fd
@@ -6,12 +8,21 @@ import numpy as np
 from PIL import Image, ImageTk
 import webbrowser
 import contextlib
-
+from parseWav import AudioParser
+import warnings
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer, event
-
+warnings.filterwarnings('ignore')
 
 # from playsound import playsound  # alternative to pygame for playing audio; seems outdated
+
+
+def getFFT(filename):
+    parser = AudioParser(filename)
+    samplingData = parser.parseAudioToSampling().split()
+    subprocess.run(["../computeFFT.sh", ""], shell=True)
+    samplingRate = samplingData[0]
+    samplingData = samplingData[1:]
 
 def openURL():
     webbrowser.open('https://github.com/igrell/audio_equalizer')
@@ -50,6 +61,7 @@ def loadAudioFile(event=None):
             return None
         else:
             print('Loaded audio file: ', audiofilename.get().split('/')[-1])
+            dialoguestr.set('Audio file loaded.')
             return audiofilename
 
 
@@ -57,7 +69,7 @@ def quitApp(event=None):  # TODO this needn't be here
     window.quit()
 
 
-def playAudio():  # TODO show 'play' again when audio finishes
+def playAudio(event=None):  # TODO show 'play' again when audio finishes
     mixer.music.load(audiofilename.get())
     if playButton["text"] == "Play":
         playButton["text"] = "Pause"
@@ -68,14 +80,67 @@ def playAudio():  # TODO show 'play' again when audio finishes
 
     # playsound(audioFilename.get())
 
-def equalize():
-    pass
+
+def equalize(event=None):
+    getFFT(audiofilename.get().split('/')[-1].split('.')[0])  # TODO i really should just change the used path of parseWav.py
+    dialoguestr.set('Changes applied.')
+
 
 def getSliderWidth(_slidersNo):
     if _slidersNo == 31:
         return 7
     else:
         return 15
+
+
+def loadTestSound(event=None):
+    audiofilename.set('/Users/igor/Documents/Kod/Proseminarium/audio_equalizer/sounds/airhorn.wav')
+    dialoguestr.set('Audio file loaded.')
+
+
+def resetSliders(event=None):
+    for slider in sliders:
+        slider.set(0.0)
+    dialoguestr.set('Equalizer parameters reset.')
+
+def menuSetup():
+    # Main menu
+    menu = Menu(window)
+    window.config(menu=menu)
+
+    # File menu
+    filemenu = Menu(menu)
+    menu.add_cascade(label='File', menu=filemenu)
+
+    filemenu.add_command(label='Open...', accelerator='Command+O', command=loadAudioFile)
+    window.bind_all("<Command-o>", loadAudioFile)
+
+    filemenu.add_command(label='Open test sound', accelerator='Command+T', command=loadTestSound)
+    window.bind_all("<Command-t>", loadTestSound)
+    filemenu.add_separator()
+
+    filemenu.add_command(label='Exit', accelerator='Command+W', command=quitApp)
+    window.bind_all("<Command-w>", quitApp)
+
+    # Track menu
+    trackmenu = Menu(menu)
+    menu.add_cascade(label='Track', menu=trackmenu)
+
+    trackmenu.add_command(label='Play', accelerator='Command+P', command=playAudio)
+    window.bind_all("<Command-p>", playAudio)
+
+    trackmenu.add_command(label='Equalize', accelerator='Command+E', command=equalize)
+    window.bind_all("<Command-e>", equalize)
+
+    trackmenu.add_command(label='Reset', accelerator='Command+R', command=resetSliders)
+    window.bind_all("<Command-r>", resetSliders)
+
+
+    # Help menu
+    helpmenu = Menu(menu)
+    menu.add_cascade(label='Help', menu=helpmenu)
+    helpmenu.add_command(label='About project', command=openURL)
+    helpmenu.entryconfigure('About project', accelerator='Command+A')
 
 
 if __name__ == '__main__':
@@ -89,7 +154,7 @@ if __name__ == '__main__':
     freqMax = 20000
     windowWidth = 1000
     windowHeight = 400
-    sliderPadX = 20
+    sliderPadX = 15
     # sliderPadX = 0.5 * ((windowWidth / slidersNo) - scaleWidth)  # TODO
 
     # Initiate pygame mixer
@@ -104,6 +169,7 @@ if __name__ == '__main__':
 
     # Variables
     audiofilename = tk.StringVar()
+    dialoguestr = tk.StringVar()
     audiodata = []
 
     # Set up window icon
@@ -118,25 +184,9 @@ if __name__ == '__main__':
     window.rowconfigure(2, weight=1)  # Spot for precise dB modulation
     window.rowconfigure(3, weight=1)  # Spot for low-ends of scales
     window.rowconfigure(4, weight=1)  # Spot for additional stuff
+    window.rowconfigure(5, weight=1)
 
-    # Menu
-    menu = Menu(window)
-    window.config(menu=menu)
-
-    # File menu
-    filemenu = Menu(menu)
-    menu.add_cascade(label='File', menu=filemenu)
-    filemenu.add_command(label='Open...', accelerator='Command+O', command=loadAudioFile)
-    window.bind_all("<Command-o>", loadAudioFile)
-    filemenu.add_separator()
-    filemenu.add_command(label='Exit', accelerator='Command+W', command=quitApp)
-    window.bind_all("<Command-w>", quitApp)
-
-    # Help menu
-    helpmenu = Menu(menu)
-    menu.add_cascade(label='Help', menu=helpmenu)
-    helpmenu.add_command(label='About project', command=openURL)
-    helpmenu.entryconfigure('About project', accelerator='Command+A')
+    menuSetup()
 
     # Slider-related stuff
     sliders = []
@@ -144,7 +194,7 @@ if __name__ == '__main__':
     labels = []
 
     # Initialize sliders
-    for i in range(0, slidersNo):
+    for i in range(0, slidersNo + 1):
         sliderVar = tk.DoubleVar(value=0.0)
         slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
                        width=sliderWidth, showvalue=True)
@@ -162,20 +212,28 @@ if __name__ == '__main__':
         labelUpVar.set(getLabelName(freqRanges[i]))
         labelDownVar.set(getLabelName(freqRanges[i + 1]))
         labels.append([labelUp, labelDown])
+    labels.append(
+        [Label(window, textvariable=StringVar(value='Master')), Label(window, textvariable=StringVar(value=''))])
 
     # Lower part of the GUI
-    text = Label(window, textvariable=audiofilename)
+    audiofileinfo = Label(window, textvariable=audiofilename)
     playButton = Button(window, text='Play', command=playAudio)
-    equalizeButton = Button(window, text='Apply changes', command=equalize)
+    equalizeButton = Button(window, text='Equalize', command=equalize)
+    resetButton = Button(window, text='Reset', command=resetSliders)
+    dialogue = Label(window, textvariable=dialoguestr)
+
 
     # Grid everything
-    for i in range(0, slidersNo):
+    for i in range(0, slidersNo + 1):
         labels[i][0].grid(row=0, column=i)
         sliders[i].grid(row=1, column=i, padx=sliderPadX)
         inputFields[i].grid(row=2, column=i)
         labels[i][1].grid(row=3, column=i)
-    text.grid(row=4, column=0, columnspan=(slidersNo - 3))
+    audiofileinfo.grid(row=4, column=0, columnspan=(slidersNo - 3))
     playButton.grid(row=4, column=(slidersNo - 3))
-    equalizeButton.grid(row=4, column=(slidersNo - 2), columnspan=2)
+    equalizeButton.grid(row=4, column=(slidersNo - 2))
+    resetButton.grid(row=4, column=(slidersNo - 1))
+    dialogue.grid(row=5, padx=10)
+
 
     window.mainloop()
