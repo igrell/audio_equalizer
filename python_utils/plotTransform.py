@@ -6,7 +6,7 @@ from io import StringIO
 def parseDataFile(filename):
     txtdata = open(filename).read().split('\n')
     data = np.loadtxt(StringIO("\n".join(txtdata[1:])))
-    if filename == '../datafiles/data.txt':  # TODO improve by shape
+    if len(data.shape) == 1:
         return data
     else:
         return data[:, 0], data[:, 1]
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     axis[3].set_ylabel('Amplitude')
 
     axis[4].set_title('Python IFT')
-    axis[4].plot(time[:delim], pythonIfft[:delim])
+    axis[4].plot(time[:delim], np.real(pythonIfft[:delim]))
     axis[4].set_xlabel('Time [s]')
     axis[4].set_ylabel('Amplitude')
 
