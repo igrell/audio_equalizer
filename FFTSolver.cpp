@@ -67,14 +67,14 @@ FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInvers
             auto oldSampleNo = sampleNo;
             sampleNo = nearestPower2(sampleNo);
             data.resize(sampleNo);
-            domainData = linspace<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
+            domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
             throw NonPower2Exception(oldSampleNo, sampleNo);
         }
     } catch (NonPower2Exception &exception) { exception.message(); }
 }
 
 FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(_data), isInverse(_isInverse), param(_param) {
-    domainData = linspace<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
+    domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
 }
 
  void FFTSolver::recFFT() {
@@ -153,14 +153,12 @@ void saveToFile(const FFTSolver &solver) {
     for (auto it = solver.domainData.begin() ; (it + 1) != solver.domainData.end() ; it++) file << (*it) << "\n";
     file << solver.domainData.back();
     file.close();
-//    for (int i = 0 ; i < 20 ; ++i) { cout << solver.domainData[i] << " "; }
-//    cout << "\n";
 }
 
 vector<complex<ldouble>> FFTSolver::getData() const { return data; }
 
 template<typename T>
-vector<T> linspace(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {
+vector<T> getDomain(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {
     vector<T> res(samplingNo);
     auto step = isInverse ? (1 / length) : (length / samplingNo);
 //    cout << "Len: " << length << " sN: " << samplingNo << " ";
@@ -170,4 +168,4 @@ vector<T> linspace(const ldouble& length, const size_t& samplingNo, const bool& 
     return res;
 }
 
-template vector<ldouble> linspace(const ldouble&,const size_t&, const bool&);
+template vector<ldouble> getDomain(const ldouble&,const size_t&, const bool&);

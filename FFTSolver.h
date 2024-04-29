@@ -45,8 +45,9 @@ public:
 
 
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {
-        for (auto it = solver.data.begin() ; (it + 1) != solver.data.end() ; it++) ostream << (solver.isInverse ? (*it).real() : abs(*it) ) << "\n";
-        ostream << abs(solver.data.back());
+        for(auto i = 0 ; i < solver.data.size() - 1 ; ++i) ostream << solver.domainData[i] <<  " " << (solver.isInverse ? solver.data[i].real() : abs(solver.data[i])) << "\n";
+//        for (auto it = solver.data.begin() ; (it + 1) != solver.data.end() ; it++) ostream << (solver.isInverse ? (*it).real() : abs(*it) ) << " " << "\n";
+        ostream << solver.domainData.back() <<  " " << abs(solver.data.back());
         return ostream;
     }
 
@@ -74,7 +75,7 @@ template<typename T>
 vector<T> bitReversePermuteVec(const vector<T>& vec);
 
 template<typename T>
-vector<T> linspace(const ldouble&, const size_t&, const bool&);
+vector<T> getDomain(const ldouble&, const size_t&, const bool&);
 
 
 #endif //AUDIO_EQUALIZER_FFTSOLVER_H

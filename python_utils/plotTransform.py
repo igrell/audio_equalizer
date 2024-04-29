@@ -1,39 +1,32 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from io import StringIO
 
 
 def parseDataFile(filename):
-    file = open(filename)
-    data = list(map(np.longdouble, file.read().split()))
-    param = data[0]
-    data = data[1:]
-    return [param, data]
+    txtdata = open(filename).read().split('\n')
+    data = np.loadtxt(StringIO("\n".join(txtdata[1:])))
+    if filename == '../datafiles/data.txt':  # TODO improve by shape
+        return data
+    else:
+        return data[:, 0], data[:, 1]
 
 
 if __name__ == '__main__':
-    tmp, fftData = parseDataFile('../results/fft_data.txt')
+    frequencies, fftData = parseDataFile('../results/fft_data.txt')
     samplingNo = len(fftData)
 
-    tmp1, ifftData = parseDataFile('../results/ifft_data.txt')
+    time, ifftData = parseDataFile('../results/ifft_data.txt')
 
-    samplingRate, signalData = parseDataFile('../datafiles/data.txt')
+    signalData = parseDataFile('../datafiles/data.txt')
     signalData = signalData[:samplingNo]  # cut data to the nearest power of 2
-    length = samplingNo / samplingRate
 
     # Python FFTs
     pythonFft = np.fft.fft(signalData)
     pythonIfft = np.fft.ifft(pythonFft)
 
-    # Frequencies for plotting
-    samplingPoints = np.arange(samplingNo)
-    frequencies = samplingPoints / length
-
-    # Time for plotting
-    time = np.linspace(0, length, samplingNo)
-    # delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
-    delim = -1
-
-    print(time)
+    delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
+    # delim = -1
 
     # Plots
     figure, axis = plt.subplots(5, 1)
