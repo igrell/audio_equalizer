@@ -1,8 +1,9 @@
-import sys
-
 import numpy as np
 from scipy.io import wavfile
 import sys
+
+
+
 
 if __name__ == '__main__':
     noArg = len(sys.argv)
@@ -28,7 +29,8 @@ if __name__ == '__main__':
     t = np.linspace(0, length, sampleRate * length)
     waves = []
     for frequency in frequencies:
-        waves.append(np.sin(frequency * 2 * np.pi * t))
+        wave = np.sin(frequency * 2 * np.pi * t)
+        waves.append(wave)
     if len(waves) > 1:
         waves.append(np.sum(waves, axis=0))
 
@@ -36,7 +38,8 @@ if __name__ == '__main__':
 
     for i in range(0, len(waves)):
         m = np.max(np.abs(waves[i]))
-        waves[i] = maxint16 * waves[i] / m
+        waves[i] = maxint16 * waves[i] # / m  # TODO ????????
+        waves[i] /= np.sqrt(10 ** (6/5))
         waves[i] = waves[i].astype(np.int16)
         audioFilename = "../sounds/sine" + str(i) + ".wav"
         wavfile.write(audioFilename, sampleRate, waves[i])

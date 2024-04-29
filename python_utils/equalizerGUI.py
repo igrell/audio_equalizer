@@ -1,5 +1,4 @@
 # TODO handle all empty files button clicks
-import os
 import subprocess
 import tkinter as tk
 from tkinter import *
@@ -9,12 +8,16 @@ from PIL import Image, ImageTk
 import webbrowser
 import contextlib
 from parseWav import AudioParser
-import warnings
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer, event
-warnings.filterwarnings('ignore')
+
 
 # from playsound import playsound  # alternative to pygame for playing audio; seems outdated
+
+
+def equalizeWave(db, wave):
+    scalar = 10 ** (db / 20)
+    return wave * scalar
 
 
 def getFFT(filename):
@@ -23,6 +26,7 @@ def getFFT(filename):
     subprocess.run(["../computeFFT.sh", ""], shell=True)
     samplingRate = samplingData[0]
     samplingData = samplingData[1:]
+
 
 def openURL():
     webbrowser.open('https://github.com/igrell/audio_equalizer')
@@ -36,7 +40,7 @@ def getFreqRanges(_slidersNo):
         _freqRanges = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                        2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
     else:
-        _freqRanges = np.linspace(_freqMin, _freqMax, _slidersNo + 1)  # if no standard applies, make bandwidth constant
+        _freqRanges = np.linspace(_freqMin, _freqMax, _slidersNo.get() + 1)  # if no standard applies, make bandwidth constant
     return _freqRanges
 
 
@@ -82,7 +86,8 @@ def playAudio(event=None):  # TODO show 'play' again when audio finishes
 
 
 def equalize(event=None):
-    getFFT(audiofilename.get().split('/')[-1].split('.')[0])  # TODO i really should just change the used path of parseWav.py
+    getFFT(audiofilename.get().split('/')[-1].split('.')[
+               0])  # TODO i really should just change the used path of parseWav.py
     dialoguestr.set('Changes applied.')
 
 
@@ -135,7 +140,6 @@ def menuSetup():
     trackmenu.add_command(label='Reset', accelerator='Command+R', command=resetSliders)
     window.bind_all("<Command-r>", resetSliders)
 
-
     # Help menu
     helpmenu = Menu(menu)
     menu.add_cascade(label='Help', menu=helpmenu)
@@ -145,10 +149,9 @@ def menuSetup():
 
 if __name__ == '__main__':
     # Constants
-    slidersNo = 10
-    sliderWidth = getSliderWidth(slidersNo)
-    scaleWidth = sliderWidth + 100  # adds width of the counter
-    amplifyFrom = 12
+    # sliderWidth = getSliderWidth(slidersNo)
+    # scaleWidth = sliderWidth + 100  # adds width of the counter
+    amplifyFrom = 12  # in dB
     amplifyTo = -12
     freqMin = 20
     freqMax = 20000
@@ -171,6 +174,7 @@ if __name__ == '__main__':
     audiofilename = tk.StringVar()
     dialoguestr = tk.StringVar()
     audiodata = []
+    slidersNo = tk.IntVar(value=10)
 
     # Set up window icon
     ico = Image.open('equalizer_icon.png')
@@ -194,10 +198,10 @@ if __name__ == '__main__':
     labels = []
 
     # Initialize sliders
-    for i in range(0, slidersNo + 1):
+    for i in range(0, slidersNo.get() + 1):
         sliderVar = tk.DoubleVar(value=0.0)
         slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
-                       width=sliderWidth, showvalue=True)
+                       width=15, showvalue=True)
         inputField = Entry(window, width=4, textvariable=sliderVar)
         slider.set((amplifyFrom + amplifyTo) / 2)
         sliders.append(slider)
@@ -212,6 +216,7 @@ if __name__ == '__main__':
         labelUpVar.set(getLabelName(freqRanges[i]))
         labelDownVar.set(getLabelName(freqRanges[i + 1]))
         labels.append([labelUp, labelDown])
+    # Master slider label
     labels.append(
         [Label(window, textvariable=StringVar(value='Master')), Label(window, textvariable=StringVar(value=''))])
 
@@ -222,18 +227,24 @@ if __name__ == '__main__':
     resetButton = Button(window, text='Reset', command=resetSliders)
     dialogue = Label(window, textvariable=dialoguestr)
 
+    # Set up buttons for sliders amount
+    buttonlabel = Label(window, text='Number of bands: ')
+    button10 = Radiobutton(window, text="10", variable=slidersNo, value=10)
+    button31 = Radiobutton(window, text="31",  variable=slidersNo, value=31)
 
     # Grid everything
-    for i in range(0, slidersNo + 1):
+    for i in range(0, slidersNo.get() + 1):
         labels[i][0].grid(row=0, column=i)
         sliders[i].grid(row=1, column=i, padx=sliderPadX)
         inputFields[i].grid(row=2, column=i)
         labels[i][1].grid(row=3, column=i)
-    audiofileinfo.grid(row=4, column=0, columnspan=(slidersNo - 3))
-    playButton.grid(row=4, column=(slidersNo - 3))
-    equalizeButton.grid(row=4, column=(slidersNo - 2))
-    resetButton.grid(row=4, column=(slidersNo - 1))
-    dialogue.grid(row=5, padx=10)
-
+    audiofileinfo.grid(row=4, column=0, columnspan=(slidersNo.get() - 3))
+    playButton.grid(row=4, column=(slidersNo.get() - 2))
+    equalizeButton.grid(row=4, column=(slidersNo.get() - 1))
+    resetButton.grid(row=4, column=slidersNo.get())
+    dialogue.grid(row=5, columnspan=5, padx=10, sticky=W)
+    buttonlabel.grid(row=5, column=(slidersNo.get() - 2))
+    button10.grid(row=5, column=(slidersNo.get() - 1))
+    button31.grid(row=5, column=(slidersNo.get()))
 
     window.mainloop()
