@@ -30,7 +30,10 @@ if __name__ == '__main__':
 
     # Time for plotting
     time = np.linspace(0, length, samplingNo)
-    delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
+    # delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
+    delim = -1
+
+    print(time)
 
     # Plots
     figure, axis = plt.subplots(5, 1)

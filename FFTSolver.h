@@ -17,11 +17,13 @@ size_t nearestPower2(size_t N);
 bool isPower2(const size_t& N);
 
 /// @class  FFTSolver
-/// @param isInverse Indicates whether an instance of FFTSolver will be used to calculate iterFFT or IFFT
-/// @param param parameter useful for plotting; samplingInterval for iterFFT, samplingRate for IFFT
 /// @param data input of iterFFT/IFFT algorithm; filled either with signal sampling or FT points to be reversed by IFFT during class construction
+/// @param domainData for FFT - time intervals, for IFFT - frequency intervals; used for plotting and EQ manipulation
+/// @param isInverse indicates whether an instance of FFTSolver will be used to calculate iterFFT or IFFT
+/// @param param parameter useful for plotting; samplingInterval for iterFFT, samplingRate for IFFT
 class FFTSolver {
     vector<complex<ldouble>> data;
+   vector<ldouble> domainData;
     const bool isInverse;
     ldouble param;
 
@@ -70,6 +72,9 @@ T bitReverse(T n, size_t len);
 ///
 template<typename T>
 vector<T> bitReversePermuteVec(const vector<T>& vec);
+
+template<typename T>
+vector<T> linspace(const ldouble&, const size_t&, const bool&);
 
 
 #endif //AUDIO_EQUALIZER_FFTSOLVER_H
