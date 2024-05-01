@@ -16,18 +16,17 @@ SignalSampling parseAudiofile(const string& filename) {
 
     string tmp;
     std::getline(file, tmp);
-    size_t sampleRate = std::stoi(tmp);
+    size_t param = std::stoi(tmp);
     vector<ldouble> audioData;
     while(std::getline(file, tmp)) audioData.emplace_back(stoi(tmp));
     file.close();
-    return {sampleRate, audioData};
+    return {param, audioData};
 }
 
 
 int main() {
-    string inputFilename = "datafiles/data.txt";
+    string inputFilename = "datafiles/after_eq.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
-    solver.iterFFT();
     FFTSolver isolver(audio, true);
     isolver.recFFT();
     saveToFile(isolver);

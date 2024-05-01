@@ -2,15 +2,15 @@ import subprocess
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog as fd
-import numpy as np
 from PIL import Image, ImageTk
 import webbrowser
 import contextlib
 from parseWav import AudioParser
 from parseWav import parseDataFile
+from scipy.io import wavfile
 
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
-    from pygame import mixer, event
+    from pygame import mixer
 
 
 # from playsound import playsound  # alternative to pygame for playing audio; seems outdated
@@ -28,6 +28,7 @@ def equalizeWaveRange(db, fftdata, freqfrom, freqto):
             fftdata[freq] *= scalar
     return fftdata
 
+
 def getFFT(filename):
     parser = AudioParser(filename)
     parser.parseAudioToSampling()
@@ -42,13 +43,14 @@ def openURL():
 
 def getFreqRanges():
     _freqMin, _freqMax = 20, 20000
+    _freqRanges = []
     if slidersNo.get() == 10:  # ISO standard for 10 bands
         _freqRanges = [20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20000]
     elif slidersNo.get() == 31:  # ISO standard for 31 bands
         _freqRanges = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                        2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
-    # else:
-    #     _freqRanges = np.linspace(_freqMin, _freqMax, slidersNo.get() + 1)  # if no standard applies, make bandwidth constant
+    # else: _freqRanges = np.linspace(_freqMin, _freqMax, slidersNo.get() + 1)  # if no standard applies,
+    # make bandwidth constant
     _freqRanges = list(zip(_freqRanges, _freqRanges[1:]))  # generate pairs of frequencies
     return _freqRanges
 
@@ -58,11 +60,6 @@ def getLabelName(freq):
         return str(int(freq)) + ' Hz'
     else:
         return str(round(freq / 1000, 1)) + ' kHz'
-
-
-def correlateValues(scale, inputField):
-    scale.set(inputField.get("1.0", "end-1c"))
-    window.after(1, correlateValues)
 
 
 def loadAudioFile(event=None):
@@ -103,16 +100,21 @@ def equalize(event=None):
     else:
         fftdata = getFFT(audiofilename.get().split('/')[-1].split('.')[
                              0])  # TODO i really should just change the used path of parseWav.py
-        out = open("../results/before_eq.txt", "w")
+        out = open("../datafiles/before_eq.txt", "w")
         out.write('\n'.join(map(str, list(fftdata.values()))))
         for i in range(0, slidersNo.get()):  # skip master for now
             db = sliders[i].get()
-            print(db)
             freqfrom = freqRanges[i][0]
             freqto = freqRanges[i][1]
             fftdata = equalizeWaveRange(db, fftdata, freqfrom, freqto)
-        out = open("../results/after_eq.txt", "w")
+        out = open("../datafiles/after_eq.txt", "w")
         out.write('\n'.join(map(str, list(fftdata.values()))))
+        subprocess.run(["../computeIFFT.sh", ""], shell=True)
+        _, ifftdata = parseDataFile("../results/ifft_data.txt")
+        samplingRate = int(open("../datafiles/data.txt").read().split('\n')[0])  # TODO!!!!! fix
+        newName = '../sounds/newAudio.wav'
+        wavfile.write(newName, samplingRate, ifftdata)
+
         dialoguestr.set('Changes applied.')
 
 
@@ -142,7 +144,6 @@ def setSliders():
         inputFields.append(inputField)
 
     # Frequency ranges for sliders
-    freqRanges = getFreqRanges()
     for j in range(0, len(freqRanges)):
         labelUpVar, labelDownVar = StringVar(), StringVar()
         labelUp = Label(window, textvariable=labelUpVar)
@@ -206,7 +207,6 @@ def setMenu():
 
 def setWindowSize():
     screenwidth = window.winfo_screenwidth()
-    screenheight = window.winfo_screenheight()
     windowHeight.set(400)
     if slidersNo.get() == 10:
         windowWidth.set(int(screenwidth * 0.6))
@@ -265,9 +265,11 @@ def gridLowerUI():
     button10.grid(row=5, column=(slidersNo.get() - 1))
     button31.grid(row=5, column=(slidersNo.get()))
 
+
 def setEQ(vals):
     for i in range(0, slidersNo.get()):
         sliders[i].set(vals[i])
+
 
 def emphBass(event=None):
     vals = []
@@ -277,7 +279,9 @@ def emphBass(event=None):
         vals = []
     setEQ(vals)
 
+
 def emphMidtones(event=None):
+    vals = []
     if slidersNo.get() == 10:
         vals = [-3, -2, -1, 5, 8, 10, 5, 0, -1, -3]
     elif slidersNo.get() == 31:
@@ -286,11 +290,13 @@ def emphMidtones(event=None):
 
 
 def emphTreble(event=None):
+    vals = []
     if slidersNo.get() == 10:
         vals = [-10, -8, -5, -1, 0, 0, 1, 5, 10, 10]
     elif slidersNo.get() == 31:
         vals = []
     setEQ(vals)
+
 
 if __name__ == '__main__':
     # Initiate pygame mixer
