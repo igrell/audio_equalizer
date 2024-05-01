@@ -1,15 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from io import StringIO
+from parseWav import parseDataFile
 
-
-def parseDataFile(filename):
-    txtdata = open(filename).read().split('\n')
-    data = np.loadtxt(StringIO("\n".join(txtdata[1:])))
-    if len(data.shape) == 1:
-        return data
-    else:
-        return data[:, 0], data[:, 1]
 
 
 if __name__ == '__main__':
@@ -25,8 +18,8 @@ if __name__ == '__main__':
     pythonFft = np.fft.fft(signalData)
     pythonIfft = np.fft.ifft(pythonFft)
 
-    delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
-    # delim = -1
+    # delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
+    delim = -1
 
     # Plots
     figure, axis = plt.subplots(5, 1)

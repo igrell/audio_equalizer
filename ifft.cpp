@@ -1,5 +1,5 @@
-#ifndef FFT
-#define FFT
+#ifndef IFFT
+#define IFFT
 
 #include <iostream>
 #include "fstream"
@@ -27,14 +27,11 @@ SignalSampling parseAudiofile(const string& filename) {
 int main() {
     string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
-    FFTSolver solver(audio, false);
-    solver.recFFT();
-//    solver.iterFFT();
-//    FFTSolver isolver(solver.getData(), true, audio.sampleRate);
-//    isolver.recFFT();
-    saveToFile(solver);
-//    saveToFile(isolver);
+    solver.iterFFT();
+    FFTSolver isolver(audio, true);
+    isolver.recFFT();
+    saveToFile(isolver);
     return 0;
 }
 
-#endif //FFT
+#endif //IFFT

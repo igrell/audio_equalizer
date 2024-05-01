@@ -1,4 +1,3 @@
-# TODO handle all empty files button clicks
 import subprocess
 import tkinter as tk
 from tkinter import *
@@ -8,6 +7,8 @@ from PIL import Image, ImageTk
 import webbrowser
 import contextlib
 from parseWav import AudioParser
+from parseWav import parseDataFile
+
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer, event
 
@@ -20,27 +21,35 @@ def equalizeWave(db, wave):
     return wave * scalar
 
 
+def equalizeWaveRange(db, fftdata, freqfrom, freqto):
+    scalar = 10 ** (db / 20)
+    for freq in fftdata.keys():
+        if freqfrom <= freq <= freqto:
+            fftdata[freq] *= scalar
+    return fftdata
+
 def getFFT(filename):
     parser = AudioParser(filename)
-    samplingData = parser.parseAudioToSampling().split()
+    parser.parseAudioToSampling()
     subprocess.run(["../computeFFT.sh", ""], shell=True)
-    samplingRate = samplingData[0]
-    samplingData = samplingData[1:]
+    frequencies, data = parseDataFile('../results/fft_data.txt')
+    return dict(zip(frequencies, data))
 
 
 def openURL():
     webbrowser.open('https://github.com/igrell/audio_equalizer')
 
 
-def getFreqRanges(_slidersNo):
+def getFreqRanges():
     _freqMin, _freqMax = 20, 20000
-    if _slidersNo == 10:  # ISO standard for 10 bands
+    if slidersNo.get() == 10:  # ISO standard for 10 bands
         _freqRanges = [20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20000]
-    elif _slidersNo == 31:  # ISO standard for 31 bands
+    elif slidersNo.get() == 31:  # ISO standard for 31 bands
         _freqRanges = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                        2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
-    else:
-        _freqRanges = np.linspace(_freqMin, _freqMax, _slidersNo.get() + 1)  # if no standard applies, make bandwidth constant
+    # else:
+    #     _freqRanges = np.linspace(_freqMin, _freqMax, slidersNo.get() + 1)  # if no standard applies, make bandwidth constant
+    _freqRanges = list(zip(_freqRanges, _freqRanges[1:]))  # generate pairs of frequencies
     return _freqRanges
 
 
@@ -74,28 +83,37 @@ def quitApp(event=None):  # TODO this needn't be here
 
 
 def playAudio(event=None):  # TODO show 'play' again when audio finishes
-    mixer.music.load(audiofilename.get())
-    if playButton["text"] == "Play":
-        playButton["text"] = "Pause"
-        mixer.music.play()
+    if audiofilename.get() == '':
+        dialoguestr.set('No audio to play.')
     else:
-        playButton["text"] = "Play"
-        mixer.music.pause()
+        mixer.music.load(audiofilename.get())
+        if playButton["text"] == "Play":
+            playButton["text"] = "Pause"
+            mixer.music.play()
+        else:
+            playButton["text"] = "Play"
+            mixer.music.pause()
 
     # playsound(audioFilename.get())
 
 
 def equalize(event=None):
-    getFFT(audiofilename.get().split('/')[-1].split('.')[
-               0])  # TODO i really should just change the used path of parseWav.py
-    dialoguestr.set('Changes applied.')
-
-
-def getSliderWidth(_slidersNo):
-    if _slidersNo == 31:
-        return 7
+    if audiofilename.get() == '':
+        dialoguestr.set('No audio to equalize.')
     else:
-        return 15
+        fftdata = getFFT(audiofilename.get().split('/')[-1].split('.')[
+                             0])  # TODO i really should just change the used path of parseWav.py
+        out = open("../results/before_eq.txt", "w")
+        out.write('\n'.join(map(str, list(fftdata.values()))))
+        for i in range(0, slidersNo.get()):  # skip master for now
+            db = sliders[i].get()
+            print(db)
+            freqfrom = freqRanges[i][0]
+            freqto = freqRanges[i][1]
+            fftdata = equalizeWaveRange(db, fftdata, freqfrom, freqto)
+        out = open("../results/after_eq.txt", "w")
+        out.write('\n'.join(map(str, list(fftdata.values()))))
+        dialoguestr.set('Changes applied.')
 
 
 def loadTestSound(event=None):
@@ -108,7 +126,36 @@ def resetSliders(event=None):
         slider.set(0.0)
     dialoguestr.set('Equalizer parameters reset.')
 
-def menuSetup():
+
+def setSliders():
+    sliders.clear()
+    inputFields.clear()
+    labels.clear()
+    # Initialize sliders
+    for j in range(0, slidersNo.get() + 1):
+        sliderVar = tk.DoubleVar()
+        slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
+                       width=sliderWidth.get(), showvalue=True)  # TODO think if i can afford showing value
+        inputField = Entry(window, width=4, textvariable=sliderVar)
+        slider.set((amplifyFrom + amplifyTo) / 2)
+        sliders.append(slider)
+        inputFields.append(inputField)
+
+    # Frequency ranges for sliders
+    freqRanges = getFreqRanges()
+    for j in range(0, len(freqRanges)):
+        labelUpVar, labelDownVar = StringVar(), StringVar()
+        labelUp = Label(window, textvariable=labelUpVar)
+        labelDown = Label(window, textvariable=labelDownVar)
+        labelUpVar.set(getLabelName(freqRanges[j][0]))
+        labelDownVar.set(getLabelName(freqRanges[j][1]))
+        labels.append([labelUp, labelDown])
+    # Master slider label
+    labels.append(
+        [Label(window, textvariable=StringVar(value='Master')), Label(window, textvariable=StringVar(value=''))])
+
+
+def setMenu():
     # Main menu
     menu = Menu(window)
     window.config(menu=menu)
@@ -140,6 +187,16 @@ def menuSetup():
     trackmenu.add_command(label='Reset', accelerator='Command+R', command=resetSliders)
     window.bind_all("<Command-r>", resetSliders)
 
+    #  Presets menu
+    presetsmenu = Menu(menu)
+    menu.add_cascade(label='Presets', menu=presetsmenu)
+    presetsmenu.add_command(label='Emphasize bass', accelerator='Command+B', command=emphBass)
+    window.bind_all("<Command-b>", emphBass)
+    presetsmenu.add_command(label='Emphasize midtones', accelerator='Command+N', command=emphMidtones)
+    window.bind_all("<Command-n>", emphMidtones)
+    presetsmenu.add_command(label='Emphasize treble', accelerator='Command+M', command=emphTreble)
+    window.bind_all("<Command-m>", emphTreble)
+
     # Help menu
     helpmenu = Menu(menu)
     menu.add_cascade(label='Help', menu=helpmenu)
@@ -147,34 +204,119 @@ def menuSetup():
     helpmenu.entryconfigure('About project', accelerator='Command+A')
 
 
-if __name__ == '__main__':
-    # Constants
-    # sliderWidth = getSliderWidth(slidersNo)
-    # scaleWidth = sliderWidth + 100  # adds width of the counter
-    amplifyFrom = 12  # in dB
-    amplifyTo = -12
-    freqMin = 20
-    freqMax = 20000
-    windowWidth = 1000
-    windowHeight = 400
-    sliderPadX = 15
-    # sliderPadX = 0.5 * ((windowWidth / slidersNo) - scaleWidth)  # TODO
+def setWindowSize():
+    screenwidth = window.winfo_screenwidth()
+    screenheight = window.winfo_screenheight()
+    windowHeight.set(400)
+    if slidersNo.get() == 10:
+        windowWidth.set(int(screenwidth * 0.6))
+        sliderPadX.set(10)
+        sliderWidth.set(15)
+    elif slidersNo.get() == 31:
+        windowWidth.set(max(1650, screenwidth))  # TODO ???
+        sliderPadX.set(0)
+        sliderWidth.set(1)
+    window.minsize(windowWidth.get(), windowHeight.get())
+    window.maxsize(windowWidth.get(), windowHeight.get())
 
+
+def forgetGrid():
+    for slider in sliders:
+        slider.grid_forget()
+    for label in labels:
+        label[0].grid_forget()
+        label[1].grid_forget()
+    for inputField in inputFields:
+        inputField.grid_forget()
+    audiofileinfo.grid_forget()
+    playButton.grid_forget()
+    equalizeButton.grid_forget()
+    resetButton.grid_forget()
+    dialogue.grid_forget()
+    buttonlabel.grid_forget()
+    button10.grid_forget()
+    button31.grid_forget()
+
+
+def gridSliders():
+    for i in range(0, slidersNo.get() + 1):
+        labels[i][0].grid(row=0, column=i)
+        sliders[i].grid(row=1, column=i, padx=sliderPadX.get())
+        inputFields[i].grid(row=2, column=i)
+        labels[i][1].grid(row=3, column=i)
+
+
+def updateSlidersNo():
+    setWindowSize()
+    forgetGrid()  # Reset grid
+    setSliders()
+    gridSliders()
+    gridLowerUI()
+    dialoguestr.set('Changed number of bands to ' + str(slidersNo.get()) + '.')
+
+
+def gridLowerUI():
+    audiofileinfo.grid(row=4, column=0, columnspan=(slidersNo.get() - 3))
+    playButton.grid(row=4, column=(slidersNo.get() - 2))
+    equalizeButton.grid(row=4, column=(slidersNo.get() - 1))
+    resetButton.grid(row=4, column=slidersNo.get())
+    dialogue.grid(row=5, columnspan=5, padx=10, sticky=W)
+    buttonlabel.grid(row=5, column=(slidersNo.get() - 2))
+    button10.grid(row=5, column=(slidersNo.get() - 1))
+    button31.grid(row=5, column=(slidersNo.get()))
+
+def setEQ(vals):
+    for i in range(0, slidersNo.get()):
+        sliders[i].set(vals[i])
+
+def emphBass(event=None):
+    vals = []
+    if slidersNo.get() == 10:
+        vals = [6, 8, 10, 0, 0, 0, -2, -5, -9, -10]
+    elif slidersNo.get() == 31:
+        vals = []
+    setEQ(vals)
+
+def emphMidtones(event=None):
+    if slidersNo.get() == 10:
+        vals = [-3, -2, -1, 5, 8, 10, 5, 0, -1, -3]
+    elif slidersNo.get() == 31:
+        vals = []
+    setEQ(vals)
+
+
+def emphTreble(event=None):
+    if slidersNo.get() == 10:
+        vals = [-10, -8, -5, -1, 0, 0, 1, 5, 10, 10]
+    elif slidersNo.get() == 31:
+        vals = []
+    setEQ(vals)
+
+if __name__ == '__main__':
     # Initiate pygame mixer
     mixer.init()
 
     window = tk.Tk()
     window.title('Very cool equalizer')
 
-    # Set constant window size
-    window.minsize(windowWidth, windowHeight)
-    window.maxsize(windowWidth, windowHeight)
-
     # Variables
     audiofilename = tk.StringVar()
     dialoguestr = tk.StringVar()
     audiodata = []
     slidersNo = tk.IntVar(value=10)
+    windowWidth = tk.IntVar()
+    windowHeight = tk.IntVar()
+    sliderPadX = tk.IntVar()
+    sliderWidth = tk.IntVar()
+    freqRanges = getFreqRanges()
+
+    # Constants
+    amplifyFrom = 12  # in dB
+    amplifyTo = -12
+    freqMin = 20
+    freqMax = 20000
+
+    setWindowSize()
 
     # Set up window icon
     ico = Image.open('equalizer_icon.png')
@@ -190,35 +332,14 @@ if __name__ == '__main__':
     window.rowconfigure(4, weight=1)  # Spot for additional stuff
     window.rowconfigure(5, weight=1)
 
-    menuSetup()
+    setMenu()
 
     # Slider-related stuff
     sliders = []
     inputFields = []
     labels = []
 
-    # Initialize sliders
-    for i in range(0, slidersNo.get() + 1):
-        sliderVar = tk.DoubleVar(value=0.0)
-        slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
-                       width=15, showvalue=True)
-        inputField = Entry(window, width=4, textvariable=sliderVar)
-        slider.set((amplifyFrom + amplifyTo) / 2)
-        sliders.append(slider)
-        inputFields.append(inputField)
-
-    # Frequency ranges for sliders
-    freqRanges = getFreqRanges(slidersNo)
-    for i in range(0, len(freqRanges) - 1):
-        labelUpVar, labelDownVar = StringVar(), StringVar()
-        labelUp = Label(window, textvariable=labelUpVar)
-        labelDown = Label(window, textvariable=labelDownVar)
-        labelUpVar.set(getLabelName(freqRanges[i]))
-        labelDownVar.set(getLabelName(freqRanges[i + 1]))
-        labels.append([labelUp, labelDown])
-    # Master slider label
-    labels.append(
-        [Label(window, textvariable=StringVar(value='Master')), Label(window, textvariable=StringVar(value=''))])
+    setSliders()
 
     # Lower part of the GUI
     audiofileinfo = Label(window, textvariable=audiofilename)
@@ -229,22 +350,11 @@ if __name__ == '__main__':
 
     # Set up buttons for sliders amount
     buttonlabel = Label(window, text='Number of bands: ')
-    button10 = Radiobutton(window, text="10", variable=slidersNo, value=10)
-    button31 = Radiobutton(window, text="31",  variable=slidersNo, value=31)
+    button10 = Radiobutton(window, text="10", variable=slidersNo, value=10, command=updateSlidersNo)
+    button31 = Radiobutton(window, text="31", variable=slidersNo, value=31, command=updateSlidersNo)
 
     # Grid everything
-    for i in range(0, slidersNo.get() + 1):
-        labels[i][0].grid(row=0, column=i)
-        sliders[i].grid(row=1, column=i, padx=sliderPadX)
-        inputFields[i].grid(row=2, column=i)
-        labels[i][1].grid(row=3, column=i)
-    audiofileinfo.grid(row=4, column=0, columnspan=(slidersNo.get() - 3))
-    playButton.grid(row=4, column=(slidersNo.get() - 2))
-    equalizeButton.grid(row=4, column=(slidersNo.get() - 1))
-    resetButton.grid(row=4, column=slidersNo.get())
-    dialogue.grid(row=5, columnspan=5, padx=10, sticky=W)
-    buttonlabel.grid(row=5, column=(slidersNo.get() - 2))
-    button10.grid(row=5, column=(slidersNo.get() - 1))
-    button31.grid(row=5, column=(slidersNo.get()))
+    gridSliders()
+    gridLowerUI()
 
     window.mainloop()

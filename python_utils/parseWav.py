@@ -1,6 +1,16 @@
 import sys
 import numpy as np
 from scipy.io import wavfile
+from io import StringIO
+
+
+def parseDataFile(filename):
+    txtdata = open(filename).read().split('\n')
+    data = np.loadtxt(StringIO("\n".join(txtdata[1:])))
+    if len(data.shape) == 1:
+        return data
+    else:
+        return data[:, 0], data[:, 1]
 
 
 class AudioParser:
@@ -53,7 +63,6 @@ class AudioParser:
         #         outFileR.write('\n')
         #     outFileL.write(str(self.audioData[self.samplingNo - 1, 0]))
         #     outFileR.write(str(self.audioData[self.samplingNo - 1, 1]))
-
 
 if __name__ == '__main__':
     parser = AudioParser(sys.argv[1])

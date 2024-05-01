@@ -148,6 +148,7 @@ void saveToFile(const FFTSolver &solver) {
     file << solver.param << "\n";
     file << solver;
     file.close();
+    // save domain to a separate text file
     outputFilename = solver.isInverse ? "results/frequency_data.txt" : "results/time_data.txt";
     file.open(outputFilename, std::ios::out);
     for (auto it = solver.domainData.begin() ; (it + 1) != solver.domainData.end() ; it++) file << (*it) << "\n";
@@ -160,7 +161,7 @@ vector<complex<ldouble>> FFTSolver::getData() const { return data; }
 template<typename T>
 vector<T> getDomain(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {
     vector<T> res(samplingNo);
-    auto step = isInverse ? (1 / length) : (length / samplingNo);
+    auto step = isInverse ? (length / samplingNo) : (1 / length) ;
 //    cout << "Len: " << length << " sN: " << samplingNo << " ";
 //    cout << "Step: " << step << "\n";
     std::iota(res.begin(), res.end(), 0);
