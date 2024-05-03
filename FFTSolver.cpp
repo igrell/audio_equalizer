@@ -161,9 +161,7 @@ vector<complex<ldouble>> FFTSolver::getData() const { return data; }
 template<typename T>
 vector<T> getDomain(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {
     vector<T> res(samplingNo);
-    auto step = isInverse ? (length / samplingNo) : (1 / length) ;
-//    cout << "Len: " << length << " sN: " << samplingNo << " ";
-//    cout << "Step: " << step << "\n";
+    auto step = isInverse ? (length / ldouble(samplingNo)) : (1 / length) ;
     std::iota(res.begin(), res.end(), 0);
     std::for_each(res.begin(), res.end(), [&step](auto& x){ x *= step; });
     return res;

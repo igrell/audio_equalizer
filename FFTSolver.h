@@ -12,10 +12,6 @@
 using std::vector, std::complex, std::ostream, std::cout, std::ofstream;
 typedef long double ldouble;
 
-size_t nearestPower2(size_t N);
-
-bool isPower2(const size_t& N);
-
 /// @class  FFTSolver
 /// @param data input of iterFFT/IFFT algorithm; filled either with signal sampling or FT points to be reversed by IFFT during class construction
 /// @param domainData for FFT - time intervals, for IFFT - frequency intervals; used for plotting and EQ manipulation
@@ -23,7 +19,7 @@ bool isPower2(const size_t& N);
 /// @param param parameter useful for plotting; samplingInterval for iterFFT, samplingRate for IFFT
 class FFTSolver {
     vector<complex<ldouble>> data;
-   vector<ldouble> domainData;
+    vector<ldouble> domainData;
     const bool isInverse;
     ldouble param;
 
@@ -56,6 +52,10 @@ public:
     vector<complex<ldouble>> getData() const;
 };
 
+size_t nearestPower2(size_t N);
+
+bool isPower2(const size_t& N);
+
 template<typename T>
 vector<complex<T>> vecToComplex(const vector<T>& vec);
 
@@ -74,6 +74,7 @@ T bitReverse(T n, size_t len);
 template<typename T>
 vector<T> bitReversePermuteVec(const vector<T>& vec);
 
+/// Return frequency domain for FFT and time domain for IFFT
 template<typename T>
 vector<T> getDomain(const ldouble&, const size_t&, const bool&);
 

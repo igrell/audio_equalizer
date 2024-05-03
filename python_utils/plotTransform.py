@@ -15,10 +15,11 @@ if __name__ == '__main__':
 
     # Python FFTs
     pythonFft = np.fft.fft(signalData)
+    pythonFft = np.real(pythonFft)
     pythonIfft = np.fft.ifft(pythonFft)
 
-    # delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
-    delim = -1
+    delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
+    # delim = -1
 
     # Plots
     figure, axis = plt.subplots(5, 1)

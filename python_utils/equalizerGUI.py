@@ -8,6 +8,7 @@ import contextlib
 from parseWav import AudioParser
 from parseWav import parseDataFile
 from scipy.io import wavfile
+from slider import Slider
 
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer
@@ -93,6 +94,10 @@ def playAudio(event=None):  # TODO show 'play' again when audio finishes
 
     # playsound(audioFilename.get())
 
+def getSlidersState():
+    state = []
+    # for i in range()
+
 
 def equalize(event=None):
     if audiofilename.get() == '':
@@ -130,11 +135,15 @@ def resetSliders(event=None):
 
 
 def setSliders():
+    # sliders.clear()
+    # for freq in freqRanges:
+    #     slider = Slider(window, sliderWidth, freq)
+    #     sliders.append(slider)
     sliders.clear()
     inputFields.clear()
     labels.clear()
     # Initialize sliders
-    for j in range(0, slidersNo.get() + 1):
+    for j in range(0, slidersNo.get()):
         sliderVar = tk.DoubleVar()
         slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
                        width=sliderWidth.get(), showvalue=True)  # TODO think if i can afford showing value
@@ -239,7 +248,7 @@ def forgetGrid():
 
 
 def gridSliders():
-    for i in range(0, slidersNo.get() + 1):
+    for i in range(0, slidersNo.get()):
         labels[i][0].grid(row=0, column=i)
         sliders[i].grid(row=1, column=i, padx=sliderPadX.get())
         inputFields[i].grid(row=2, column=i)
