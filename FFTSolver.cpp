@@ -57,24 +57,25 @@ vector<complex<T>> vecToComplex(const vector<T> &vec) {
 }
 template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
 
-FFTSolver::FFTSolver(SignalSampling _sampling, const bool _isInverse) : isInverse(_isInverse) {
+FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : isInverse(_isInverse) {
     data = vecToComplex(_sampling.sampleData);
 //    std::copy(_sampling.sampleData.begin(), _sampling.sampleData.end(), std::back_inserter(data));
     auto sampleNo = data.size();
-    param = isInverse ? _sampling.sampleRate : _sampling.sampleInterval;
+    param = isInverse ? ldouble(_sampling.sampleRate) : _sampling.sampleInterval;
     try {
         if (!isPower2(sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampleNo;
             sampleNo = nearestPower2(sampleNo);
             data.resize(sampleNo);
-            domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
             throw NonPower2Exception(oldSampleNo, sampleNo);
         }
+        domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
     } catch (NonPower2Exception &exception) { exception.message(); }
 }
 
-FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(_data), isInverse(_isInverse), param(_param) {
+FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
     domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
+
 }
 
  void FFTSolver::recFFT() {
@@ -149,14 +150,20 @@ void saveToFile(const FFTSolver &solver) {
     file << solver;
     file.close();
     // save domain to a separate text file
-    outputFilename = solver.isInverse ? "results/frequency_data.txt" : "results/time_data.txt";
-    file.open(outputFilename, std::ios::out);
-    for (auto it = solver.domainData.begin() ; (it + 1) != solver.domainData.end() ; it++) file << (*it) << "\n";
-    file << solver.domainData.back();
-    file.close();
+//    outputFilename = solver.isInverse ? "results/frequency_data.txt" : "results/time_data.txt";
+//    file.open(outputFilename, std::ios::out);
+//    for (auto it = solver.domainData.begin() ; (it + 1) != solver.domainData.end() ; it++) file << (*it) << "\n";
+//    file << solver.domainData.back();
+//    file.close();
 }
 
 vector<complex<ldouble>> FFTSolver::getData() const { return data; }
+
+vector<ldouble> FFTSolver::getSolverDomain() const { return domainData; }
+
+vector<ldouble>& FFTSolver::getSolverDomain() { return domainData; }
+
+vector<complex<ldouble>>& FFTSolver::getData() { return data; }
 
 template<typename T>
 vector<T> getDomain(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {

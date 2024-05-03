@@ -25,13 +25,13 @@ class FFTSolver {
 
 public:
 
-   FFTSolver(SignalSampling, bool);
+   FFTSolver(const SignalSampling&, bool);
 
    FFTSolver(vector<complex<ldouble>>, bool, ldouble);
 
    void recFFT();
 
-    void recFFTStep(vector<complex<ldouble>> &currTransform);
+   void recFFTStep(vector<complex<ldouble>> &currTransform);
 
 /// Compute Fast Fourier Transform (iterFFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
@@ -50,6 +50,13 @@ public:
     friend void saveToFile(const FFTSolver&);
 
     vector<complex<ldouble>> getData() const;
+
+    vector<complex<ldouble>>& getData();
+
+    vector<lbouble> getSolverDomain() const;
+
+    vector<lbouble>& getSolverDomain();  // TODO this is disgusting, check todo below
+
 };
 
 size_t nearestPower2(size_t N);
@@ -76,7 +83,7 @@ vector<T> bitReversePermuteVec(const vector<T>& vec);
 
 /// Return frequency domain for FFT and time domain for IFFT
 template<typename T>
-vector<T> getDomain(const ldouble&, const size_t&, const bool&);
+vector<T> getDomain(const ldouble&, const size_t&, const bool&); // TODO move this to class body one day
 
 
 #endif //AUDIO_EQUALIZER_FFTSOLVER_H

@@ -8,7 +8,6 @@ import contextlib
 from parseWav import AudioParser
 from parseWav import parseDataFile
 from scipy.io import wavfile
-from slider import Slider
 
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer
@@ -94,33 +93,56 @@ def playAudio(event=None):  # TODO show 'play' again when audio finishes
 
     # playsound(audioFilename.get())
 
+
 def getSlidersState():
     state = []
-    # for i in range()
+    for i in range(0, slidersNo.get()):
+        state.append([freqRanges[i][0], freqRanges[i][1], sliders[i].get()])
+    return state
 
+
+def sliderStateToTxt(state):
+    outFilename = "../datafiles/freqState.txt"
+    statetxt = ''
+    for i in range(0, len(state) - 1):
+        statetxt += str(state[i][0]) + ' ' + str(state[i][1]) + ' ' + str(state[i][2]) + '\n'
+    statetxt += str(state[len(state) - 1][0]) + ' ' + str(state[len(state) - 1][1]) + ' ' + str(state[len(state) - 1][2])
+    open(outFilename, "w").write(statetxt)
+
+def getFilename(filepath):
+    return filepath.split('/')[-1].split('.')[0]
 
 def equalize(event=None):
     if audiofilename.get() == '':
         dialoguestr.set('No audio to equalize.')
     else:
-        fftdata = getFFT(audiofilename.get().split('/')[-1].split('.')[
-                             0])  # TODO i really should just change the used path of parseWav.py
-        out = open("../datafiles/before_eq.txt", "w")
-        out.write('\n'.join(map(str, list(fftdata.values()))))
-        for i in range(0, slidersNo.get()):  # skip master for now
-            db = sliders[i].get()
-            freqfrom = freqRanges[i][0]
-            freqto = freqRanges[i][1]
-            fftdata = equalizeWaveRange(db, fftdata, freqfrom, freqto)
-        out = open("../datafiles/after_eq.txt", "w")
-        out.write('\n'.join(map(str, list(fftdata.values()))))
-        subprocess.run(["../computeIFFT.sh", ""], shell=True)
-        _, ifftdata = parseDataFile("../results/ifft_data.txt")
-        samplingRate = int(open("../datafiles/data.txt").read().split('\n')[0])  # TODO!!!!! fix
-        newName = '../sounds/newAudio.wav'
-        wavfile.write(newName, samplingRate, ifftdata)
+        parser = AudioParser(getFilename(audiofilename.get()))
+        parser.parseAudioToSampling()
+        slidersState = getSlidersState()
+        sliderStateToTxt(slidersState)
+        subprocess.run(['g++', '-std=c++2a', 'SignalSampling.cpp', 'FFTSolver.cpp', 'equalize.cpp'], shell=True, check=True)
+
+
+
+
+        # fftdata = getFFT(audiofilename.get().split('/')[-1].split('.')[
+        #                      0])  # TODO i really should just change the used path of parseWav.py
+        # out = open("../datafiles/before_eq.txt", "w")
+        # out.write('\n'.join(map(str, list(fftdata.values()))))
+        # for i in range(0, slidersNo.get()):  # skip master for now
+        #     db = sliders[i].get(equalize     freqfrom = freqRanges[i][0]
+        #     freqto = freqRanges[i][1]
+        #     fftdata = equalizeWaveRange(db, fftdata, freqfrom, freqto)
+        # out = open("../datafiles/after_eq.txt", "w")
+        # out.write('\n'.join(map(str, list(fftdata.values()))))
+        # subprocess.run(["../computeIFFT.sh", ""], shell=True)
+        # _, ifftdata = parseDataFile("../results/ifft_data.txt")
+        # samplingRate = int(open("../datafiles/data.txt").read().split('\n')[0])  # TODO!!!!! fix
+        # newName = '../sounds/newAudio.wav'
+        # wavfile.write(newName, samplingRate, ifftdata)
 
         dialoguestr.set('Changes applied.')
+
 
 
 def loadTestSound(event=None):
@@ -248,6 +270,9 @@ def forgetGrid():
 
 
 def gridSliders():
+    # i = 0
+    # for slider in sliders:
+    #     slider.scale.grid(row=1, column=i, padx=sliderPadX.get())
     for i in range(0, slidersNo.get()):
         labels[i][0].grid(row=0, column=i)
         sliders[i].grid(row=1, column=i, padx=sliderPadX.get())
