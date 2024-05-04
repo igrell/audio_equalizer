@@ -14,18 +14,6 @@ from scipy.io import wavfile
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer
 
-
-# from playsound import playsound  # alternative to pygame for playing audio; seems outdated
-
-
-# def getFFT(filename):
-#     parser = AudioParser(filename)
-#     parser.parseAudioToSampling()
-#     subprocess.run(["../computeFFT.sh", ""], shell=True)
-#     _, frequencies, data = parseDataFile('../results/fft_data.txt')
-#     return dict(zip(frequencies, data))
-
-
 def openURL():
     webbrowser.open('https://github.com/igrell/audio_equalizer')
 
@@ -38,9 +26,7 @@ def getFreqRanges():
     elif slidersNo.get() == 31:  # ISO standard for 31 bands
         _freqRanges = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                        2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
-    # else: _freqRanges = np.linspace(_freqMin, _freqMax, slidersNo.get() + 1)  # if no standard applies,
-    # make bandwidth constant
-    _freqRanges = list(zip(_freqRanges, _freqRanges[1:]))  # generate pairs of frequencies
+    _freqRanges = list(zip(_freqRanges, _freqRanges[1:]))  # Generate pairs of frequencies
     return _freqRanges
 
 

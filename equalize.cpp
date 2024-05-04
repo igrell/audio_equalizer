@@ -44,25 +44,19 @@ vector<pair<freqRange, ldouble>> parseSlidersState(const string& filename) {
 
 void equalizeSample(const ldouble db, complex<ldouble>& sample) {
     auto scalar = pow(10, db / 20);
-    sample *= scalar; // TODO math goes here
+    sample *= scalar;
 }
 
 void equalize(const vector<pair<freqRange, ldouble>>& state, FFTSolver& solver) {
     auto dataIt = solver.getData().begin();
     auto domainIt = solver.getSolverDomain().begin();
     auto stateIt = state.begin();
-    const ldouble* freqFrom; // TODO can be removed later
-    const ldouble* freqTo;
-    const ldouble* db;
     while (domainIt != solver.getSolverDomain().end() and stateIt != state.end()) {
-        freqFrom = &stateIt->first.first;
-        freqTo = &stateIt->first.second;
-        db = &stateIt->second;
-        if (*freqFrom <= *domainIt and *domainIt <= *freqTo) {
-           equalizeSample(*db, *dataIt);
+        if (stateIt->first.first <= *domainIt and *domainIt <= stateIt->first.second) {
+           equalizeSample(stateIt->second, *dataIt);
            domainIt++; dataIt++;
         } else {
-            if (*domainIt < *freqFrom) { domainIt++; dataIt++; }
+            if (*domainIt < stateIt->first.first) { domainIt++; dataIt++; }
             else stateIt++;
         }
     }
@@ -79,19 +73,9 @@ int main() {
     auto state = parseSlidersState("datafiles/freqState.txt");
     equalize(state, solver);
 
-    FFTSolver isolver(solver.getData(), true, audio.sampleRate);
+    FFTSolver isolver(solver.getData(), true, ldouble(audio.sampleRate));
     isolver.recFFT();
     saveToFile(isolver);
-
-//    auto state = vector<pair<freqRange, ldouble>>{{{0, 1}, 2}, {{1, 2}, 3}, {{2, 3}, 4}};
-//    auto data = vector<complex<ldouble>>{1, 1, 1, 1};
-//    auto solver1 = FFTSolver(data, false, 4);
-//    solver1.recFFT();
-//    saveToFile(solver1);
-//    for (auto el : solver1.getData()) cout << el << " ";
-//    cout << "\n";
-//    equalize(state, solver1);
-//    for (auto el : solver1.getData()) cout << el << " ";
     return 0;
 }
 
