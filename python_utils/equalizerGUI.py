@@ -120,7 +120,8 @@ def equalize(event=None):
         parser.parseAudioToSampling()
         slidersState = getSlidersState()
         sliderStateToTxt(slidersState)
-        subprocess.run(['g++', '-std=c++2a', 'SignalSampling.cpp', 'FFTSolver.cpp', 'equalize.cpp'], shell=True, check=True)
+        subprocess.call("cd .. && ./equalizeScript.sh && cd python_utils", shell=True)
+        # subprocess.run(['cd', '..', '&&', './', 'equalizeScript.sh', '&&', 'cd', 'python_utils'], shell=True, check=True)
 
 
 

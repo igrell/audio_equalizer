@@ -41,7 +41,9 @@ public:
 
 
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {
-        for(auto i = 0 ; i < solver.data.size() - 1 ; ++i) ostream << solver.domainData[i] <<  " " << (solver.isInverse ? solver.data[i].real() : abs(solver.data[i])) << "\n";
+        for(auto i = 0 ; i < solver.data.size() - 1 ; ++i) ostream <<
+        solver.domainData[i] <<  " " <<
+        (solver.isInverse ? solver.data[i].real() : abs(solver.data[i])) << "\n";
 //        for (auto it = solver.data.begin() ; (it + 1) != solver.data.end() ; it++) ostream << (solver.isInverse ? (*it).real() : abs(*it) ) << " " << "\n";
         ostream << solver.domainData.back() <<  " " << abs(solver.data.back());
         return ostream;
@@ -53,9 +55,11 @@ public:
 
     vector<complex<ldouble>>& getData();
 
-    vector<lbouble> getSolverDomain() const;
+    vector<ldouble> getSolverDomain() const;
 
-    vector<lbouble>& getSolverDomain();  // TODO this is disgusting, check todo below
+    vector<ldouble>& getSolverDomain();  // TODO this is disgusting, check todo below
+
+    void setInverse(bool);
 
 };
 

@@ -1,9 +1,9 @@
 #include "SignalSampling.h"
 #include "iostream"
 
-using std::cout;
+using std::cout, std::ostream;
 
-std::ostream& operator<<(std::ostream& ostream, const SignalSampling& audio) {
+ostream& operator<<(ostream& ostream, const SignalSampling& audio) {
     ostream << "-------Signal sampling data-------\n";
     ostream << "Sample rate [Hz]: " << audio.sampleRate;
     ostream << "\nNo. of samples: " << audio.sampleNo;

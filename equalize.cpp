@@ -42,31 +42,55 @@ vector<pair<freqRange, ldouble>> parseSlidersState(const string& filename) {
     return state;
 }
 
+void equalizeSample(const ldouble db, complex<ldouble>& sample) {
+//    sample *= db; // TODO math goes here
+}
 
 void equalize(const vector<pair<freqRange, ldouble>>& state, FFTSolver& solver) {
     auto dataIt = solver.getData().begin();
     auto domainIt = solver.getSolverDomain().begin();
     auto stateIt = state.begin();
+    const ldouble* freqFrom; // TODO can be removed later
+    const ldouble* freqTo;
+    const ldouble* db;
     while (domainIt != solver.getSolverDomain().end() and stateIt != state.end()) {
-        if (stateIt->first.first <= *domainIt and *domainIt <= stateIt->first.second) {
-           // equalize this range by stateIt.second
-           domainIt++;
-           dataIt++;
-        } else { stateIt++; }
+        freqFrom = &stateIt->first.first;
+        freqTo = &stateIt->first.second;
+        db = &stateIt->second;
+        if (*freqFrom <= *domainIt and *domainIt <= *freqTo) {
+           equalizeSample(*db, *dataIt);
+           domainIt++; dataIt++;
+        } else {
+            if (*domainIt < *freqFrom) { domainIt++; dataIt++; }
+            else stateIt++;
+        }
     }
 }
 
 
 int main() {
-    string inputFilename = "../datafiles/data.txt";
+    string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
     FFTSolver solver(audio, false);
     solver.recFFT();
+    saveToFile(solver);
 
-    auto state = parseSlidersState("../datafiles/freqState.txt");
+    auto state = parseSlidersState("datafiles/freqState.txt");
     equalize(state, solver);
 
-//    saveToFile(solver);
+    FFTSolver isolver(solver.getData(), true, audio.sampleRate);
+    isolver.recFFT();
+    saveToFile(isolver);
+
+//    auto state = vector<pair<freqRange, ldouble>>{{{0, 1}, 2}, {{1, 2}, 3}, {{2, 3}, 4}};
+//    auto data = vector<complex<ldouble>>{1, 1, 1, 1};
+//    auto solver1 = FFTSolver(data, false, 4);
+//    solver1.recFFT();
+//    saveToFile(solver1);
+//    for (auto el : solver1.getData()) cout << el << " ";
+//    cout << "\n";
+//    equalize(state, solver1);
+//    for (auto el : solver1.getData()) cout << el << " ";
     return 0;
 }
 
