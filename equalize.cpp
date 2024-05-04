@@ -43,7 +43,8 @@ vector<pair<freqRange, ldouble>> parseSlidersState(const string& filename) {
 }
 
 void equalizeSample(const ldouble db, complex<ldouble>& sample) {
-//    sample *= db; // TODO math goes here
+    auto scalar = pow(10, db / 20);
+    sample *= scalar; // TODO math goes here
 }
 
 void equalize(const vector<pair<freqRange, ldouble>>& state, FFTSolver& solver) {

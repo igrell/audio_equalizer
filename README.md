@@ -7,9 +7,9 @@ This project uses C++20 and Python 3, and as such will require:
 * python3 compiler
 * bash shell (default location: "/bin/bash")
 ## Usage
-Just run bash script inside the project directory, with `audiofile` being the name of a `.wav` file in the `sounds` directory:
+Navigate to `python_utils` and execute
 
-    ./runAnalysis.sh audiofile
+python equalizerGUI.py
 
 ## Note
 This project was written as a part of a thesis for Bachelor's Degree in Computational Mathematics at Jagiellonian University in Kraków.
