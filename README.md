@@ -9,7 +9,7 @@ This project uses C++20 and Python 3, and as such will require:
 ## Usage
 Navigate to `python_utils` and execute
 
-python equalizerGUI.py
+```python equalizerGUI.py```
 
 ## Note
 This project was written as a part of a thesis for Bachelor's Degree in Computational Mathematics at Jagiellonian University in Kraków.
