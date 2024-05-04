@@ -18,25 +18,12 @@ with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
 # from playsound import playsound  # alternative to pygame for playing audio; seems outdated
 
 
-def equalizeWave(db, wave):
-    scalar = 10 ** (db / 20)
-    return wave * scalar
-
-
-def equalizeWaveRange(db, fftdata, freqfrom, freqto):
-    scalar = 10 ** (db / 20)
-    for freq in fftdata.keys():
-        if freqfrom <= freq <= freqto:
-            fftdata[freq] *= scalar
-    return fftdata
-
-
-def getFFT(filename):
-    parser = AudioParser(filename)
-    parser.parseAudioToSampling()
-    subprocess.run(["../computeFFT.sh", ""], shell=True)
-    _, frequencies, data = parseDataFile('../results/fft_data.txt')
-    return dict(zip(frequencies, data))
+# def getFFT(filename):
+#     parser = AudioParser(filename)
+#     parser.parseAudioToSampling()
+#     subprocess.run(["../computeFFT.sh", ""], shell=True)
+#     _, frequencies, data = parseDataFile('../results/fft_data.txt')
+#     return dict(zip(frequencies, data))
 
 
 def openURL():
