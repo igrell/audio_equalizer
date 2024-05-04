@@ -7,7 +7,7 @@ This project uses C++20 and Python 3, and as such will require:
 * python3 compiler
 * bash shell (default location: "/bin/bash")
 ## Usage
-Navigate to `python_utils` and execute
+Navigate to `python_utils` and execute:
 
 ```python equalizerGUI.py```
 
