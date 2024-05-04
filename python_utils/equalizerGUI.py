@@ -2,6 +2,8 @@ import subprocess
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog as fd
+
+import numpy as np
 from PIL import Image, ImageTk
 import webbrowser
 import contextlib
@@ -33,7 +35,7 @@ def getFFT(filename):
     parser = AudioParser(filename)
     parser.parseAudioToSampling()
     subprocess.run(["../computeFFT.sh", ""], shell=True)
-    frequencies, data = parseDataFile('../results/fft_data.txt')
+    _, frequencies, data = parseDataFile('../results/fft_data.txt')
     return dict(zip(frequencies, data))
 
 
@@ -121,27 +123,11 @@ def equalize(event=None):
         slidersState = getSlidersState()
         sliderStateToTxt(slidersState)
         subprocess.call("cd .. && ./equalizeScript.sh && cd python_utils", shell=True)
-        # subprocess.run(['cd', '..', '&&', './', 'equalizeScript.sh', '&&', 'cd', 'python_utils'], shell=True, check=True)
-
-
-
-
-        # fftdata = getFFT(audiofilename.get().split('/')[-1].split('.')[
-        #                      0])  # TODO i really should just change the used path of parseWav.py
-        # out = open("../datafiles/before_eq.txt", "w")
-        # out.write('\n'.join(map(str, list(fftdata.values()))))
-        # for i in range(0, slidersNo.get()):  # skip master for now
-        #     db = sliders[i].get(equalize     freqfrom = freqRanges[i][0]
-        #     freqto = freqRanges[i][1]
-        #     fftdata = equalizeWaveRange(db, fftdata, freqfrom, freqto)
-        # out = open("../datafiles/after_eq.txt", "w")
-        # out.write('\n'.join(map(str, list(fftdata.values()))))
-        # subprocess.run(["../computeIFFT.sh", ""], shell=True)
-        # _, ifftdata = parseDataFile("../results/ifft_data.txt")
-        # samplingRate = int(open("../datafiles/data.txt").read().split('\n')[0])  # TODO!!!!! fix
-        # newName = '../sounds/newAudio.wav'
-        # wavfile.write(newName, samplingRate, ifftdata)
-
+        samplingRate, _, ifftData = parseDataFile("../results/ifft_data.txt")  # can be later changed to data
+        samplingRate = int(samplingRate)
+        ifftData = ifftData.astype(np.int16)
+        newAudioFilename = '../sounds/newAudio.wav'
+        wavfile.write(newAudioFilename, samplingRate, ifftData.astype(np.int16))
         dialoguestr.set('Changes applied.')
 
 

@@ -6,11 +6,12 @@ from io import StringIO
 
 def parseDataFile(filename):
     txtdata = open(filename).read().split('\n')
+    param = txtdata[0]
     data = np.loadtxt(StringIO("\n".join(txtdata[1:])))
     if len(data.shape) == 1:
         return data
     else:
-        return data[:, 0], data[:, 1]
+        return param, data[:, 0], data[:, 1]
 
 
 class AudioParser:

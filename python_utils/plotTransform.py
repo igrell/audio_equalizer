@@ -5,10 +5,10 @@ from parseWav import parseDataFile
 
 
 if __name__ == '__main__':
-    frequencies, fftData = parseDataFile('../results/fft_data.txt')
+    _, frequencies, fftData = parseDataFile('../results/fft_data.txt')
     samplingNo = len(fftData)
 
-    time, ifftData = parseDataFile('../results/ifft_data.txt')
+    _, time, ifftData = parseDataFile('../results/ifft_data.txt')
 
     signalData = parseDataFile('../datafiles/data.txt')
     signalData = signalData[:samplingNo]  # cut data to the nearest power of 2
