@@ -62,11 +62,11 @@ def playAudio(event=None):  # TODO show 'play' again when audio finishes
         if playButton["text"] == "Play":
             playButton["text"] = "Pause"
             mixer.music.play()
+            # playButton["text"] == "Play"
         else:
             playButton["text"] = "Play"
             mixer.music.pause()
 
-    # playsound(audioFilename.get())
 
 
 def getSlidersState():
