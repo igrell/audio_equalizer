@@ -1,7 +1,9 @@
+import os.path
 import subprocess
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog as fd
+from tkinter import font as TkFont
 
 import numpy as np
 from PIL import Image, ImageTk
@@ -13,6 +15,7 @@ from scipy.io import wavfile
 
 with contextlib.redirect_stdout(None):  # Hide pygame welcome prompt
     from pygame import mixer
+
 
 def openURL():
     webbrowser.open('https://github.com/igrell/audio_equalizer')
@@ -40,12 +43,14 @@ def getLabelName(freq):
 def loadAudioFile(event=None):
     audiofilename.set(fd.askopenfilename())
     if audiofilename.get() != '':
-        filetype = audiofilename.get().split('.')[1]
-        if filetype != 'wav':
-            print('Wrong filetype! Please insert a WAV file')
+        _, fileextension = os.path.splitext(audiofilename.get())
+        if fileextension != '.wav':
+            print('Wrong extension! Please insert a WAV file')
             return None
         else:
-            print('Loaded audio file: ', audiofilename.get().split('/')[-1])
+            print('Loaded audio file: ', os.path.basename(audiofilename.get()))
+            audiofilenameshort.set('Currently loaded file: ' + os.path.basename(audiofilename.get()))
+            recentfiles.append(audiofilename.get())
             dialoguestr.set('Audio file loaded.')
             return audiofilename
 
@@ -62,11 +67,9 @@ def playAudio(event=None):  # TODO show 'play' again when audio finishes
         if playButton["text"] == "Play":
             playButton["text"] = "Pause"
             mixer.music.play()
-            # playButton["text"] == "Play"
         else:
             playButton["text"] = "Play"
             mixer.music.pause()
-
 
 
 def getSlidersState():
@@ -81,17 +84,16 @@ def sliderStateToTxt(state):
     statetxt = ''
     for i in range(0, len(state) - 1):
         statetxt += str(state[i][0]) + ' ' + str(state[i][1]) + ' ' + str(state[i][2]) + '\n'
-    statetxt += str(state[len(state) - 1][0]) + ' ' + str(state[len(state) - 1][1]) + ' ' + str(state[len(state) - 1][2])
+    statetxt += str(state[len(state) - 1][0]) + ' ' + str(state[len(state) - 1][1]) + ' ' + str(
+        state[len(state) - 1][2])
     open(outFilename, "w").write(statetxt)
 
-def getFilename(filepath):
-    return filepath.split('/')[-1].split('.')[0]
 
 def equalize(event=None):
     if audiofilename.get() == '':
         dialoguestr.set('No audio to equalize.')
     else:
-        parser = AudioParser(getFilename(audiofilename.get()))
+        parser = AudioParser(os.path.basename(audiofilename.get()).split('.')[0])
         parser.parseAudioToSampling()
         slidersState = getSlidersState()
         sliderStateToTxt(slidersState)
@@ -102,7 +104,6 @@ def equalize(event=None):
         newAudioFilename = '../sounds/newAudio.wav'
         wavfile.write(newAudioFilename, samplingRate, ifftData.astype(np.int16))
         dialoguestr.set('Changes applied.')
-
 
 
 def loadTestSound(event=None):
@@ -159,6 +160,12 @@ def setMenu():
     filemenu.add_command(label='Open...', accelerator='Command+O', command=loadAudioFile)
     window.bind_all("<Command-o>", loadAudioFile)
 
+    # Recent files submenu
+    # recentmenu = Menu(menu)
+    # filemenu.add_cascade(menu=recentmenu, label='Open Recent')
+    # for file in recentfiles:
+    #     recentmenu.add_command(label=os.path.basename(file), command=loadAudioFile)
+
     filemenu.add_command(label='Open test sound', accelerator='Command+T', command=loadTestSound)
     window.bind_all("<Command-t>", loadTestSound)
     filemenu.add_separator()
@@ -182,12 +189,16 @@ def setMenu():
     #  Presets menu
     presetsmenu = Menu(menu)
     menu.add_cascade(label='Presets', menu=presetsmenu)
-    presetsmenu.add_command(label='Emphasize bass', accelerator='Command+B', command=emphBass)
-    window.bind_all("<Command-b>", emphBass)
-    presetsmenu.add_command(label='Emphasize midtones', accelerator='Command+N', command=emphMidtones)
-    window.bind_all("<Command-n>", emphMidtones)
-    presetsmenu.add_command(label='Emphasize treble', accelerator='Command+M', command=emphTreble)
-    window.bind_all("<Command-m>", emphTreble)
+    presetsmenu.add_command(label='Bass boost', accelerator='Command+B', command=bassBoost)
+    window.bind_all("<Command-b>", bassBoost)
+    presetsmenu.add_command(label='Bass cut', accelerator='Command+B', command=bassCut)
+    window.bind_all("<Command-b>", bassCut)
+    presetsmenu.add_command(label='Midtones boost', accelerator='Command+N', command=midBoost)
+    window.bind_all("<Command-n>", midBoost)
+    presetsmenu.add_command(label='Treble boost', accelerator='Command+M', command=trebleBoost)
+    window.bind_all("<Command-m>", trebleBoost)
+    presetsmenu.add_command(label='Treble cut', accelerator='Command+M', command=trebleCut)
+    window.bind_all("<Command-m>", trebleCut)
 
     # Help menu
     helpmenu = Menu(menu)
@@ -200,7 +211,7 @@ def setWindowSize():
     screenwidth = window.winfo_screenwidth()
     windowHeight.set(400)
     if slidersNo.get() == 10:
-        windowWidth.set(int(screenwidth * 0.6))
+        windowWidth.set(int(screenwidth * 0.55))
         sliderPadX.set(10)
         sliderWidth.set(15)
     elif slidersNo.get() == 31:
@@ -250,14 +261,15 @@ def updateSlidersNo():
 
 
 def gridLowerUI():
-    audiofileinfo.grid(row=4, column=0, columnspan=(slidersNo.get() - 3))
-    playButton.grid(row=4, column=(slidersNo.get() - 2))
-    equalizeButton.grid(row=4, column=(slidersNo.get() - 1))
-    resetButton.grid(row=4, column=slidersNo.get())
+    audiofileinfo.grid(row=4, column=0, columnspan=6, padx=10)
+    playButton.grid(row=4, column=(slidersNo.get() - 4))
+    equalizeButton.grid(row=4, column=(slidersNo.get() - 3))
+    resetButton.grid(row=4, column=slidersNo.get() - 2)
+    previewButton.grid(row=4, column=slidersNo.get() - 1)
     dialogue.grid(row=5, columnspan=5, padx=10, sticky=W)
-    buttonlabel.grid(row=5, column=(slidersNo.get() - 2))
-    button10.grid(row=5, column=(slidersNo.get() - 1))
-    button31.grid(row=5, column=(slidersNo.get()))
+    # buttonlabel.grid(row=5, column=(slidersNo.get() - 2))
+    # button10.grid(row=5, column=(slidersNo.get() - 1))
+    # button31.grid(row=5, column=(slidersNo.get()))
 
 
 def setEQ(vals):
@@ -265,16 +277,25 @@ def setEQ(vals):
         sliders[i].set(vals[i])
 
 
-def emphBass(event=None):
+def bassBoost(event=None):
     vals = []
     if slidersNo.get() == 10:
-        vals = [6, 8, 10, 0, 0, 0, -2, -5, -9, -10]
+        vals = [10, 10, 8, 8, 3, 0, 0, 0, 0, 0]
     elif slidersNo.get() == 31:
         vals = []
     setEQ(vals)
 
 
-def emphMidtones(event=None):
+def bassCut(event=None):
+    vals = []
+    if slidersNo.get() == 10:
+        vals = [-12, -12, -12, -12, 1, 0, 0, 0, 0, 0]
+    elif slidersNo.get() == 31:
+        vals = []
+    setEQ(vals)
+
+
+def midBoost(event=None):
     vals = []
     if slidersNo.get() == 10:
         vals = [-3, -2, -1, 5, 8, 10, 5, 0, -1, -3]
@@ -283,13 +304,35 @@ def emphMidtones(event=None):
     setEQ(vals)
 
 
-def emphTreble(event=None):
+def trebleBoost(event=None):
     vals = []
     if slidersNo.get() == 10:
-        vals = [-10, -8, -5, -1, 0, 0, 1, 5, 10, 10]
+        vals = [0, 0, 0, 0, 0, 0, 0, 0, 10, 10]
     elif slidersNo.get() == 31:
         vals = []
     setEQ(vals)
+
+
+def trebleCut(event=None):
+    vals = []
+    if slidersNo.get() == 10:
+        vals = [0, 0, 0, 0, 0, 0, 0, 2, -12, -12]
+    elif slidersNo.get() == 31:
+        vals = []
+    setEQ(vals)
+
+
+def previewEqualization():
+    if audiofilename.get() == '':
+        dialoguestr.set('No audio to preview.')
+    else:
+        mixer.music.load('../sounds/newAudio.wav')
+        if previewButton["text"] == "Preview":
+            previewButton["text"] = "Pause"
+            mixer.music.play()
+        else:
+            previewButton["text"] = "Preview"
+            mixer.music.pause()
 
 
 if __name__ == '__main__':
@@ -298,6 +341,11 @@ if __name__ == '__main__':
 
     window = tk.Tk()
     window.title('Very cool equalizer')
+
+    # Font
+    # default_font = TkFont.nametofont("TkDefaultFont")
+    # default_font.configure(size=12)
+    # window.option_add("*Font", default_font)
 
     # Variables
     audiofilename = tk.StringVar()
@@ -309,6 +357,9 @@ if __name__ == '__main__':
     sliderPadX = tk.IntVar()
     sliderWidth = tk.IntVar()
     freqRanges = getFreqRanges()
+    recentfiles = []
+    audiofilenameshort = tk.StringVar()
+    audiofilenameshort.set(os.path.basename(audiofilename.get()))
 
     # Constants
     amplifyFrom = 12  # in dB
@@ -342,10 +393,11 @@ if __name__ == '__main__':
     setSliders()
 
     # Lower part of the GUI
-    audiofileinfo = Label(window, textvariable=audiofilename)
-    playButton = Button(window, text='Play', command=playAudio)
-    equalizeButton = Button(window, text='Equalize', command=equalize)
-    resetButton = Button(window, text='Reset', command=resetSliders)
+    audiofileinfo = Label(window, textvariable=audiofilenameshort)
+    playButton = Button(window, text='Play', command=playAudio, width=5)
+    equalizeButton = Button(window, text='Equalize', command=equalize, width=5)
+    resetButton = Button(window, text='Flatten', command=resetSliders, width=5)
+    previewButton = Button(window, text='Preview', command=previewEqualization, width=5)
     dialogue = Label(window, textvariable=dialoguestr)
 
     # Set up buttons for sliders amount
