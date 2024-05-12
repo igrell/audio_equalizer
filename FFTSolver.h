@@ -5,11 +5,10 @@
 #include "complex"
 #include "SignalSampling.h"
 #include "cassert"
-#include "format"
 #include "iostream"
 #include "fstream"
 
-using std::vector, std::complex, std::ostream, std::cout, std::ofstream;
+using std::vector, std::complex, std::ostream;
 typedef long double ldouble;
 
 /// @class  FFTSolver

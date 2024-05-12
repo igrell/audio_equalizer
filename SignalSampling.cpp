@@ -1,7 +1,9 @@
 #include "SignalSampling.h"
 #include "iostream"
+#include "fstream"
+#include "vector"
 
-using std::cout, std::ostream;
+using std::cout, std::ostream, std::string, std::ifstream, std::vector;
 
 ostream& operator<<(ostream& ostream, const SignalSampling& audio) {
     ostream << "-------Signal sampling data-------\n";
@@ -11,6 +13,19 @@ ostream& operator<<(ostream& ostream, const SignalSampling& audio) {
     ostream << "\nSampling total time [s]: " << audio.length << "\n";
     ostream << "----------------------------------\n";
     return ostream;
+}
+
+SignalSampling parseAudiofile(const string& filename) {
+    ifstream file;
+    file.open(filename, ifstream::in);
+
+    string tmp;
+    getline(file, tmp);
+    size_t param = stoi(tmp);
+    vector<ldouble> audioData;
+    while(getline(file, tmp)) audioData.emplace_back(stoi(tmp));
+    file.close();
+    return {param, audioData};
 }
 
 SignalSampling::SignalSampling(const size_t _sampleRate, vector<ldouble> _sampleData) :

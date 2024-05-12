@@ -3,7 +3,6 @@
 
 #include "vector"
 #include "cassert"
-#include "iostream"
 
 using std::vector, std::ostream;
 typedef long double ldouble;
@@ -17,9 +16,11 @@ public:
     ldouble sampleInterval;
 
     SignalSampling(size_t _sampleRate, vector<ldouble> _sampleData);
+
 };
 
 ostream& operator<<(ostream&, const SignalSampling&);
 
+SignalSampling parseAudiofile(const std::string&);
 
 #endif //AUDIO_EQUALIZER_SIGNALSAMPLING_H

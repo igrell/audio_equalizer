@@ -3,13 +3,12 @@
 #include <utility>
 #include "complex"
 #include "vector"
-#include "iostream"
 #include "exceptions/NonPower2Exception.h"
 #include "format"
 #include "algorithm"
 #include "numeric"
 
-using std::cout, std::pair, std::transform, std::string;
+using std::vector, std::complex, std::exp, std::ofstream;
 typedef long double ldouble;
 
 size_t nearestPower2(size_t N) {
@@ -52,7 +51,7 @@ template size_t bitReverse(size_t, size_t);
 template<typename T>
 vector<complex<T>> vecToComplex(const vector<T> &vec) {
     vector<complex<T>> res(vec.size());
-    transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
+    std::transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
     return res;
 }
 template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
@@ -98,7 +97,7 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
      recFFTStep(evens);
      recFFTStep(odds);
 
-     complex<ldouble> W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+     complex<ldouble> W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
      complex<ldouble> Wn = {1, 0};
      complex<ldouble> oddFactor;
      for (size_t k = 0 ; k != N2 ; ++k) {
@@ -119,7 +118,7 @@ void FFTSolver::iterFFT() {
 
 //    for (auto transformLen = 2 ; transformLen != N ; transformLen <<= 1) {
 //        tmpTransform = data;
-//        W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+//        W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
 //        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
 //        for(auto i = 0 ; i < N2 ; i += 2) {
 //            oddFactor = Wn * tmpTransform[i + 1];
@@ -132,7 +131,7 @@ void FFTSolver::iterFFT() {
 
     for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
         tmpTransform = data;
-        W = std::exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+        W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
         Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
         for (auto i = 0, k = 0 ; i < N ; i += 2, ++k) { // use pair of adjacent points to get the data
             oddFactor = Wn * tmpTransform[i + 1];
@@ -145,7 +144,7 @@ void FFTSolver::iterFFT() {
 
 void saveToFile(const FFTSolver &solver) {
     ofstream file;
-    string outputFilename = solver.isInverse ? "results/ifft_data.txt" : "results/fft_data.txt";
+    std::string outputFilename = solver.isInverse ? "results/ifft_data.txt" : "results/fft_data.txt";
     if(!file.is_open()) file.open(outputFilename, std::ios::out);
     file << solver.param << "\n";
     file << solver;

@@ -7,22 +7,9 @@
 #include "SignalSampling.h"
 #include "FFTSolver.h"
 
-using std::ifstream, std::cout, std::string, std::vector, std::getline, std::stoi, std::pair;
+using std::ifstream, std::string, std::vector, std::getline, std::pair;
 typedef long double ldouble;
 typedef pair<ldouble, ldouble> freqRange;
-
-SignalSampling parseAudiofile(const string& filename) {
-    ifstream file;
-    file.open(filename, ifstream::in);
-
-    string tmp;
-    getline(file, tmp);
-    size_t sampleRate = stoi(tmp);
-    vector<ldouble> audioData;
-    while(getline(file, tmp)) audioData.emplace_back(stoi(tmp));
-    file.close();
-    return {sampleRate, audioData};
-}
 
 vector<pair<freqRange, ldouble>> parseSlidersState(const string& filename) {
     ifstream file;
@@ -34,7 +21,7 @@ vector<pair<freqRange, ldouble>> parseSlidersState(const string& filename) {
     vector<ldouble> tmp;
     while(getline(file, line)) {
         std::istringstream ss(line);
-        while (getline(ss, word, ' '))  tmp.emplace_back(stoi(word));
+        while (getline(ss, word, ' '))  tmp.emplace_back(std::stoi(word));
         state.emplace_back(freqRange(tmp[0], tmp[1]), tmp[2]);
         tmp.clear();
     }
