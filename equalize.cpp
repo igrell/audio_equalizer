@@ -34,7 +34,8 @@ void equalizeSample(const ldouble db, complex<ldouble>& sample) {
     sample *= scalar;
 }
 
-void equalize(const vector<pair<freqRange, ldouble>>& state, FFTSolver& solver) {
+template<std::floating_point FTYPE>
+void equalize(const vector<pair<freqRange, ldouble>>& state, FFTSolver<FTYPE>& solver) {
     auto dataIt = solver.getData().begin();
     auto domainIt = solver.getSolverDomain().begin();
     auto stateIt = state.begin();
@@ -53,7 +54,7 @@ void equalize(const vector<pair<freqRange, ldouble>>& state, FFTSolver& solver) 
 int main() {
     string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
-    FFTSolver solver(audio, false);
+    FFTSolver<long double> solver(audio, false);
     solver.recFFT();
     saveToFile(solver);
 

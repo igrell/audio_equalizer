@@ -9,7 +9,6 @@
 #include "numeric"
 
 using std::vector, std::complex, std::exp, std::ofstream;
-typedef long double ldouble;
 
 size_t nearestPower2(size_t N) {
     if (N == 1) return 1;
@@ -34,7 +33,9 @@ vector<T> bitReversePermuteVec(const vector<T> &vec) {
     for (size_t i = 1 ; i < (N / 2) - 1 ; ++i) std::swap(res.at(i), res.at(bitReverse(i, len))); // edge indexes changed as edges never swap
     return res;
 }
-template vector<complex<ldouble>> bitReversePermuteVec(const vector<complex<ldouble>>&);
+template vector<complex<float>> bitReversePermuteVec(const vector<complex<float>>&);
+template vector<complex<double>> bitReversePermuteVec(const vector<complex<double>>&);
+template vector<complex<long double>> bitReversePermuteVec(const vector<complex<long double>>&);
 
 template<typename T>
 T bitReverse(T n, size_t len) {
@@ -54,41 +55,55 @@ vector<complex<T>> vecToComplex(const vector<T> &vec) {
     std::transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
     return res;
 }
-template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
+template vector<complex<float>> vecToComplex(const vector<float>&);
+template vector<complex<double>> vecToComplex(const vector<double>&);
+template vector<complex<long double>> vecToComplex(const vector<long double>&);
 
-FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : isInverse(_isInverse) {
+template<std::floating_point FTYPE>
+FFTSolver<FTYPE>::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : isInverse(_isInverse) {
     data = vecToComplex(_sampling.sampleData);
 //    std::copy(_sampling.sampleData.begin(), _sampling.sampleData.end(), std::back_inserter(data));
     auto sampleNo = data.size();
-    param = isInverse ? ldouble(_sampling.sampleRate) : _sampling.sampleInterval;
+    param = isInverse ? FTYPE(_sampling.sampleRate) : _sampling.sampleInterval;
     try {
         if (!isPower2(sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampleNo;
             sampleNo = nearestPower2(sampleNo);
             data.resize(sampleNo);
-            domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
+            domainData = getDomain<FTYPE>(FTYPE(sampleNo) / FTYPE(_sampling.sampleRate), sampleNo, isInverse);
             throw NonPower2Exception(oldSampleNo, sampleNo);
         }
-        domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
+        domainData = getDomain<FTYPE>(FTYPE(sampleNo) / FTYPE(_sampling.sampleRate), sampleNo, isInverse);
     } catch (NonPower2Exception &exception) { exception.message(); }
 }
+template FFTSolver<float>::FFTSolver(const SignalSampling &, bool);
+template FFTSolver<double>::FFTSolver(const SignalSampling &, bool);
+template FFTSolver<long double>::FFTSolver(const SignalSampling &, bool);
 
-FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
-    domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
-
+template<std::floating_point FTYPE>
+FFTSolver<FTYPE>::FFTSolver(vector<complex<FTYPE>> _data, bool _isInverse, FTYPE _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
+    domainData = getDomain<FTYPE>(FTYPE(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
 }
+template FFTSolver<float>::FFTSolver(vector<complex<float>>, bool, float);
+template FFTSolver<double>::FFTSolver(vector<complex<double>>, bool, double);
+template FFTSolver<long double>::FFTSolver(vector<complex<long double>>, bool, long double);
 
- void FFTSolver::recFFT() {
+template<std::floating_point FTYPE>
+ void FFTSolver<FTYPE>::recFFT() {
     if (isInverse) for (auto& el : data) { el /= data.size(); }
      recFFTStep(data);
 }
+template void FFTSolver<float>::recFFT();
+template void FFTSolver<double>::recFFT();
+template void FFTSolver<long double>::recFFT();
 
- void FFTSolver::recFFTStep(vector<complex<ldouble>> &currTransform) {
+template<std::floating_point FTYPE>
+void FFTSolver<FTYPE>::recFFTStep(vector<complex<FTYPE>> &currTransform) {
      const size_t& N = currTransform.size();
      if (N < 2) return;
      size_t N2 = N >> 1;
 
-     vector<complex<ldouble>> evens, odds;
+     vector<complex<FTYPE>> evens, odds;
      for (size_t i = 0 ; i < N2 ; ++i) {
          evens.emplace_back(currTransform[2 * i]);
          odds.emplace_back(currTransform[(2 * i) + 1]);
@@ -97,9 +112,9 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
      recFFTStep(evens);
      recFFTStep(odds);
 
-     complex<ldouble> W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
-     complex<ldouble> Wn = {1, 0};
-     complex<ldouble> oddFactor;
+     complex<FTYPE> W = exp(complex<FTYPE>((isInverse ? -1 : 1) * 2.0 * M_PI / FTYPE(N) ) * complex<FTYPE>{0,1} );
+     complex<FTYPE> Wn = {1, 0};
+     complex<FTYPE> oddFactor;
      for (size_t k = 0 ; k != N2 ; ++k) {
          oddFactor = Wn * odds[k];
          currTransform[k] = (evens[k] + oddFactor);
@@ -107,18 +122,22 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
          Wn *= W;
      }
  }
+template void FFTSolver<float>::recFFTStep(vector<complex<float>> &currTransform);
+template void FFTSolver<double>::recFFTStep(vector<complex<double>> &currTransform);
+template void FFTSolver<long double>::recFFTStep(vector<complex<long double>> &currTransform);
 
 // TODO multiply by (1/N) for IFFT
-void FFTSolver::iterFFT() {
-    complex<ldouble> oddFactor, W, Wn;
-    vector<complex<ldouble>> tmpTransform; // will save values of data from previous iter
+template<std::floating_point FTYPE>
+void FFTSolver<FTYPE>::iterFFT() {
+    complex<FTYPE> oddFactor, W, Wn;
+    vector<complex<FTYPE>> tmpTransform; // will save values of data from previous iter
     const size_t &N = data.size();
     const size_t N2 = N >> 1;
     data = bitReversePermuteVec(data);
 
 //    for (auto transformLen = 2 ; transformLen != N ; transformLen <<= 1) {
 //        tmpTransform = data;
-//        W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+//        W = exp(complex<FTYPE>((isInverse ? -1 : 1) * 2.0 * M_PI / FTYPE(N) ) * complex<FTYPE>{0,1} );
 //        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
 //        for(auto i = 0 ; i < N2 ; i += 2) {
 //            oddFactor = Wn * tmpTransform[i + 1];
@@ -131,7 +150,7 @@ void FFTSolver::iterFFT() {
 
     for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
         tmpTransform = data;
-        W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
+        W = exp(complex<FTYPE>((isInverse ? -1 : 1) * 2.0 * M_PI / FTYPE(N) ) * complex<FTYPE>{0,1} );
         Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
         for (auto i = 0, k = 0 ; i < N ; i += 2, ++k) { // use pair of adjacent points to get the data
             oddFactor = Wn * tmpTransform[i + 1];
@@ -141,8 +160,12 @@ void FFTSolver::iterFFT() {
         }
     }
 }
+template<> void FFTSolver<float>::iterFFT();
+template<> void FFTSolver<double>::iterFFT();
+template<> void FFTSolver<long double>::iterFFT();
 
-void saveToFile(const FFTSolver &solver) {
+template<std::floating_point FTYPE>
+void saveToFile(const FFTSolver<FTYPE> &solver) {
     ofstream file;
     std::string outputFilename = solver.isInverse ? "results/ifft_data.txt" : "results/fft_data.txt";
     if(!file.is_open()) file.open(outputFilename, std::ios::out);
@@ -156,22 +179,42 @@ void saveToFile(const FFTSolver &solver) {
 //    file << solver.domainData.back();
 //    file.close();
 }
+template void saveToFile(const FFTSolver<float>&);
+template void saveToFile(const FFTSolver<double>&);
+template void saveToFile(const FFTSolver<long double>&);
 
-vector<complex<ldouble>> FFTSolver::getData() const { return data; }
+template<std::floating_point FTYPE>
+vector<complex<FTYPE>> FFTSolver<FTYPE>::getData() const { return data; }
+template vector<complex<float>> FFTSolver<float>::getData() const;
+template vector<complex<double>> FFTSolver<double>::getData() const;
+template vector<complex<long double>> FFTSolver<long double>::getData() const;
 
-vector<ldouble> FFTSolver::getSolverDomain() const { return domainData; }
+template<std::floating_point FTYPE>
+vector<FTYPE> FFTSolver<FTYPE>::getSolverDomain() const { return domainData; }
+template<> vector<float> FFTSolver<float>::getSolverDomain() const;
+template<> vector<double> FFTSolver<double>::getSolverDomain() const;
+template<> vector<long double> FFTSolver<long double>::getSolverDomain() const;
 
-vector<ldouble>& FFTSolver::getSolverDomain() { return domainData; }
+template<std::floating_point FTYPE>
+vector<FTYPE>& FFTSolver<FTYPE>::getSolverDomain() { return domainData; }
+template<> vector<float>& FFTSolver<float>::getSolverDomain();
+template<> vector<double>& FFTSolver<double>::getSolverDomain();
+template<> vector<long double>& FFTSolver<long double>::getSolverDomain();
 
-vector<complex<ldouble>>& FFTSolver::getData() { return data; }
+template<std::floating_point FTYPE>
+vector<complex<FTYPE>>& FFTSolver<FTYPE>::getData() { return data; }
+template vector<complex<float>>& FFTSolver<float>::getData();
+template vector<complex<double>>& FFTSolver<double>::getData();
+template vector<complex<long double>>& FFTSolver<long double>::getData();
 
-template<typename T>
-vector<T> getDomain(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {
+template<typename T, std::floating_point FTYPE>
+vector<T> getDomain(const FTYPE& length, const size_t& samplingNo, const bool& isInverse) {
     vector<T> res(samplingNo);
-    auto step = isInverse ? (length / ldouble(samplingNo)) : (1 / length) ;
+    auto step = isInverse ? (length / FTYPE(samplingNo)) : (1 / length) ;
     std::iota(res.begin(), res.end(), 0);
     std::for_each(res.begin(), res.end(), [&step](auto& x){ x *= step; });
     return res;
 }
-
-template vector<ldouble> getDomain(const ldouble&,const size_t&, const bool&);
+template vector<float> getDomain(const float&,const size_t&, const bool&);
+template vector<double> getDomain(const double&,const size_t&, const bool&);
+template vector<long double> getDomain(const long double&,const size_t&, const bool&);

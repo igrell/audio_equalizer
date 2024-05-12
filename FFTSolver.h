@@ -9,28 +9,28 @@
 #include "fstream"
 
 using std::vector, std::complex, std::ostream;
-typedef long double ldouble;
 
 /// @class  FFTSolver
 /// @param data input of iterFFT/IFFT algorithm; filled either with signal sampling or FT points to be reversed by IFFT during class construction
 /// @param domainData for FFT - time intervals, for IFFT - frequency intervals; used for plotting and EQ manipulation
 /// @param isInverse indicates whether an instance of FFTSolver will be used to calculate iterFFT or IFFT
 /// @param param parameter useful for plotting; samplingInterval for iterFFT, samplingRate for IFFT
+template<std::floating_point FTYPE>
 class FFTSolver {
-    vector<complex<ldouble>> data;
-    vector<ldouble> domainData;
+    vector<complex<FTYPE>> data;
+    vector<FTYPE> domainData;
     const bool isInverse;
-    ldouble param;
+    FTYPE param;
 
 public:
 
    FFTSolver(const SignalSampling&, bool);
 
-   FFTSolver(vector<complex<ldouble>>, bool, ldouble);
+   FFTSolver(vector<complex<FTYPE>>, bool, FTYPE);
 
    void recFFT();
 
-   void recFFTStep(vector<complex<ldouble>> &currTransform);
+   void recFFTStep(vector<complex<FTYPE>> &currTransform);
 
 /// Compute Fast Fourier Transform (iterFFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
@@ -50,13 +50,13 @@ public:
 
     friend void saveToFile(const FFTSolver&);
 
-    vector<complex<ldouble>> getData() const;
+    vector<complex<FTYPE>> getData() const;
 
-    vector<complex<ldouble>>& getData();
+    vector<complex<FTYPE>>& getData();
 
-    vector<ldouble> getSolverDomain() const;
+    vector<FTYPE> getSolverDomain() const;
 
-    vector<ldouble>& getSolverDomain();  // TODO this is disgusting, check todo below
+    vector<FTYPE>& getSolverDomain();  // TODO this is disgusting, check todo below
 
     void setInverse(bool);
 
@@ -85,8 +85,8 @@ template<typename T>
 vector<T> bitReversePermuteVec(const vector<T>& vec);
 
 /// Return frequency domain for FFT and time domain for IFFT
-template<typename T>
-vector<T> getDomain(const ldouble&, const size_t&, const bool&); // TODO move this to class body one day
+template<typename T, std::floating_point FTYPE>
+vector<T> getDomain(const FTYPE&, const size_t&, const bool&); // TODO move this to class body one day
 
 
 #endif //AUDIO_EQUALIZER_FFTSOLVER_H
