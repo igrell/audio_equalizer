@@ -108,6 +108,7 @@ def equalize(event=None):
 
 def loadTestSound(event=None):
     audiofilename.set('/Users/igor/Documents/Kod/Proseminarium/audio_equalizer/sounds/airhorn.wav')
+    audiofilenameshort.set('Currently loaded audio: ' + os.path.basename(audiofilename.get()))
     dialoguestr.set('Audio file loaded.')
 
 
