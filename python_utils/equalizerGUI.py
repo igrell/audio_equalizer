@@ -3,7 +3,6 @@ import subprocess
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog as fd
-from tkinter import font as TkFont
 
 import numpy as np
 from PIL import Image, ImageTk
