@@ -18,6 +18,13 @@ size_t nearestPower2(size_t N) {
     return res;
 }
 
+size_t nearestPower2up(size_t N) {
+    if (N == 1) return 1;
+    size_t res = 2;
+    while ((N = N >> 1) != 1) res = res << 1;
+    return res << 1;
+}
+
 bool isPower2(const size_t &N) {
     return (N > 0 && ((N & (N - 1)) == 0));
 }
@@ -58,13 +65,14 @@ template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
 
 FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : isInverse(_isInverse) {
     data = vecToComplex(_sampling.sampleData);
-//    std::copy(_sampling.sampleData.begin(), _sampling.sampleData.end(), std::back_inserter(data));
-    auto sampleNo = data.size();
+    audioSampleNo = data.size();
+    auto sampleNo = audioSampleNo;
     param = isInverse ? ldouble(_sampling.sampleRate) : _sampling.sampleInterval;
     try {
         if (!isPower2(sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampleNo;
-            sampleNo = nearestPower2(sampleNo);
+//            sampleNo = nearestPower2(sampleNo);
+            sampleNo = nearestPower2up(sampleNo);
             data.resize(sampleNo);
             domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
             throw NonPower2Exception(oldSampleNo, sampleNo);
@@ -80,7 +88,7 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
 
  void FFTSolver::recFFT() {
     if (isInverse) for (auto& el : data) { el /= data.size(); }
-     recFFTStep(data);
+    recFFTStep(data);
 }
 
  void FFTSolver::recFFTStep(vector<complex<ldouble>> &currTransform) {
@@ -164,6 +172,10 @@ vector<ldouble> FFTSolver::getSolverDomain() const { return domainData; }
 vector<ldouble>& FFTSolver::getSolverDomain() { return domainData; }
 
 vector<complex<ldouble>>& FFTSolver::getData() { return data; }
+
+unsigned long FFTSolver::getAudioSampleNo() const { return audioSampleNo; }
+
+void FFTSolver::resizeData(const size_t N) { data.resize(N); }
 
 template<typename T>
 vector<T> getDomain(const ldouble& length, const size_t& samplingNo, const bool& isInverse) {

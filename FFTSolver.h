@@ -21,6 +21,7 @@ class FFTSolver {
     vector<ldouble> domainData;
     const bool isInverse;
     ldouble param;
+    unsigned long audioSampleNo;
 
 public:
 
@@ -54,12 +55,15 @@ public:
 
     vector<complex<ldouble>>& getData();
 
+    void resizeData(const size_t N);
+
     vector<ldouble> getSolverDomain() const;
 
     vector<ldouble>& getSolverDomain();  // TODO this is disgusting, check todo below
 
     void setInverse(bool);
 
+    unsigned long getAudioSampleNo() const;
 };
 
 size_t nearestPower2(size_t N);
