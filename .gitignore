@@ -6,3 +6,5 @@ CMakeLists.txt
 python_utils/fft_test.py
 python_utils/__pycache__
 1equalizeScript.sh
+datafiles/*
+results/*
