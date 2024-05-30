@@ -30,9 +30,9 @@ public:
 
    FFTSolver(vector<cld>, bool, ldouble);
 
-   void recFFT();
+   void FFT();
 
-   void recFFTStep(vector<cld> &currTransform);
+   void FFTStep(vector<cld> &currTransform);
 
 /// Compute Fast Fourier Transform (iterFFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)

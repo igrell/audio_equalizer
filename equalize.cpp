@@ -54,17 +54,14 @@ int main() {
     string inputFilename = "datafiles/data.txt";
     SignalSampling audio = parseAudiofile(inputFilename);
     FFTSolver solver(audio, false);
-    solver.recFFT();
-//    solver.iterFFT();
+    solver.FFT();
     saveToFile(solver);
 
     auto state = parseSlidersState("datafiles/freqState.txt");
     equalize(state, solver);
 
     FFTSolver isolver(solver.getData(), true, ldouble(audio.sampleRate));
-    isolver.recFFT();
-//    isolver.iterFFT();
-//    isolver.resizeData(isolver.getAudioSampleNo());
+    isolver.FFT();
     saveToFile(isolver);
     return 0;
 }

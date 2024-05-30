@@ -87,12 +87,12 @@ FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(
 
 }
 
- void FFTSolver::recFFT() {
+ void FFTSolver::FFT() {
     if (isInverse) for (auto& el : data) { el /= data.size(); }
-    recFFTStep(data);
+    FFTStep(data);
 }
 
- void FFTSolver::recFFTStep(vector<cld> &currTransform) {
+ void FFTSolver::FFTStep(vector<cld> &currTransform) {
      const size_t& N = currTransform.size();
      if (N < 2) return;
      size_t N2 = N >> 1;
@@ -103,8 +103,8 @@ FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(
          odds.emplace_back(currTransform[(2 * i) + 1]);
      }
 
-     recFFTStep(evens);
-     recFFTStep(odds);
+     FFTStep(evens);
+     FFTStep(odds);
 
      cld W = exp(cld((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * cld{0,1} );
      cld Wn = {1, 0};
