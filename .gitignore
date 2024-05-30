@@ -8,3 +8,4 @@ python_utils/__pycache__
 1equalizeScript.sh
 datafiles/*
 results/*
+!info.txt
