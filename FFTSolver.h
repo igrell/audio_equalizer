@@ -10,6 +10,7 @@
 
 using std::vector, std::complex, std::ostream;
 typedef long double ldouble;
+typedef complex<ldouble> cld;
 
 /// @class  FFTSolver
 /// @param data input of iterFFT/IFFT algorithm; filled either with signal sampling or FT points to be reversed by IFFT during class construction
@@ -17,7 +18,7 @@ typedef long double ldouble;
 /// @param isInverse indicates whether an instance of FFTSolver will be used to calculate iterFFT or IFFT
 /// @param param parameter useful for plotting; samplingInterval for iterFFT, samplingRate for IFFT
 class FFTSolver {
-    vector<complex<ldouble>> data;
+    vector<cld> data;
     vector<ldouble> domainData;
     const bool isInverse;
     ldouble param;
@@ -27,11 +28,11 @@ public:
 
    FFTSolver(const SignalSampling&, bool);
 
-   FFTSolver(vector<complex<ldouble>>, bool, ldouble);
+   FFTSolver(vector<cld>, bool, ldouble);
 
    void recFFT();
 
-   void recFFTStep(vector<complex<ldouble>> &currTransform);
+   void recFFTStep(vector<cld> &currTransform);
 
 /// Compute Fast Fourier Transform (iterFFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
@@ -44,16 +45,15 @@ public:
         for(auto i = 0 ; i < solver.data.size() - 1 ; ++i) ostream <<
         solver.domainData[i] <<  " " <<
         (solver.isInverse ? solver.data[i].real() : abs(solver.data[i])) << "\n";
-//        for (auto it = solver.data.begin() ; (it + 1) != solver.data.end() ; it++) ostream << (solver.isInverse ? (*it).real() : abs(*it) ) << " " << "\n";
         ostream << solver.domainData.back() <<  " " << abs(solver.data.back());
         return ostream;
     }
 
     friend void saveToFile(const FFTSolver&);
 
-    vector<complex<ldouble>> getData() const;
+    vector<cld> getData() const;
 
-    vector<complex<ldouble>>& getData();
+    vector<cld>& getData();
 
     void resizeData(const size_t N);
 

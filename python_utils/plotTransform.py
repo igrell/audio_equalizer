@@ -18,7 +18,7 @@ if __name__ == '__main__':
     pythonFft = np.real(pythonFft)
     pythonIfft = np.fft.ifft(pythonFft)
 
-    delim = 2000  # restrict plot to some first points for visual clarity; make -1 for all data
+    delim = 200000  # restrict plot to some first points for visual clarity; make -1 for all data
     # delim = -1
 
     # Plots
@@ -52,3 +52,4 @@ if __name__ == '__main__':
 
     plt.savefig('../results/transform_plot.png')
     plt.show()
+    print(pythonFft)

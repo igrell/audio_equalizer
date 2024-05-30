@@ -3,6 +3,7 @@
 
 #include "vector"
 #include "cassert"
+#include <string>
 
 using std::vector, std::ostream;
 typedef long double ldouble;

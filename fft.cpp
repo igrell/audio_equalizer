@@ -9,6 +9,7 @@ int main() {
     SignalSampling audio = parseAudiofile(inputFilename);
     FFTSolver solver(audio, false);
     solver.recFFT();
+//    solver.iterFFT();
     saveToFile(solver);
     return 0;
 }

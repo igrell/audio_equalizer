@@ -10,6 +10,7 @@
 
 using std::vector, std::complex, std::exp, std::ofstream;
 typedef long double ldouble;
+typedef complex<ldouble> cld;
 
 size_t nearestPower2(size_t N) {
     if (N == 1) return 1;
@@ -41,7 +42,7 @@ vector<T> bitReversePermuteVec(const vector<T> &vec) {
     for (size_t i = 1 ; i < (N / 2) - 1 ; ++i) std::swap(res.at(i), res.at(bitReverse(i, len))); // edge indexes changed as edges never swap
     return res;
 }
-template vector<complex<ldouble>> bitReversePermuteVec(const vector<complex<ldouble>>&);
+template vector<cld> bitReversePermuteVec(const vector<cld>&);
 
 template<typename T>
 T bitReverse(T n, size_t len) {
@@ -61,7 +62,7 @@ vector<complex<T>> vecToComplex(const vector<T> &vec) {
     std::transform( vec.begin(), vec.end(), res.begin(),[](auto x){ return (complex<T>)x; });
     return res;
 }
-template vector<complex<ldouble>> vecToComplex(const vector<ldouble>&);
+template vector<cld> vecToComplex(const vector<ldouble>&);
 
 FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : isInverse(_isInverse) {
     data = vecToComplex(_sampling.sampleData);
@@ -81,7 +82,7 @@ FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : i
     } catch (NonPower2Exception &exception) { exception.message(); }
 }
 
-FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
+FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
     domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
 
 }
@@ -91,12 +92,12 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
     recFFTStep(data);
 }
 
- void FFTSolver::recFFTStep(vector<complex<ldouble>> &currTransform) {
+ void FFTSolver::recFFTStep(vector<cld> &currTransform) {
      const size_t& N = currTransform.size();
      if (N < 2) return;
      size_t N2 = N >> 1;
 
-     vector<complex<ldouble>> evens, odds;
+     vector<cld> evens, odds;
      for (size_t i = 0 ; i < N2 ; ++i) {
          evens.emplace_back(currTransform[2 * i]);
          odds.emplace_back(currTransform[(2 * i) + 1]);
@@ -105,9 +106,9 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
      recFFTStep(evens);
      recFFTStep(odds);
 
-     complex<ldouble> W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
-     complex<ldouble> Wn = {1, 0};
-     complex<ldouble> oddFactor;
+     cld W = exp(cld((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * cld{0,1} );
+     cld Wn = {1, 0};
+     cld oddFactor;
      for (size_t k = 0 ; k != N2 ; ++k) {
          oddFactor = Wn * odds[k];
          currTransform[k] = (evens[k] + oddFactor);
@@ -116,38 +117,31 @@ FFTSolver::FFTSolver(vector<complex<ldouble>> _data, bool _isInverse, ldouble _p
      }
  }
 
-// TODO multiply by (1/N) for IFFT
-void FFTSolver::iterFFT() {
-    complex<ldouble> oddFactor, W, Wn;
-    vector<complex<ldouble>> tmpTransform; // will save values of data from previous iter
-    const size_t &N = data.size();
-    const size_t N2 = N >> 1;
+ void FFTSolver::iterFFT() {
     data = bitReversePermuteVec(data);
-
-//    for (auto transformLen = 2 ; transformLen != N ; transformLen <<= 1) {
-//        tmpTransform = data;
-//        W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
-//        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
-//        for(auto i = 0 ; i < N2 ; i += 2) {
-//            oddFactor = Wn * tmpTransform[i + 1];
-//            tmpTransform[i] = tmpTransform[i] + oddFactor;
-//            tmpTransform[i + N2] = tmpTransform[i] - oddFactor;
-//            Wn *= W;
-//        }
-//    }
-
-
-    for (auto transformSize = N ; transformSize != 1 ; transformSize >>= 1) {
-        tmpTransform = data;
-        W = exp(complex<ldouble>((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * complex<ldouble>{0,1} );
-        Wn = {1,0}; // W constant, multiplied to obtain W^n in each iter
-        for (auto i = 0, k = 0 ; i < N ; i += 2, ++k) { // use pair of adjacent points to get the data
-            oddFactor = Wn * tmpTransform[i + 1];
-            data[k] = tmpTransform[i] + oddFactor;
-            data[k + N2] = tmpTransform[i] - oddFactor; // generate second half of datafiles (Danielson-Lanczos symmetry formulas)
-            Wn *= W;
-        }
+    const size_t &N = data.size();
+    unsigned m = 1, m2; // (m/2)
+    size_t id1, id2;
+    cld omega, omega_m, t, u;
+    auto rotation_constant = (isInverse ? -1. : 1.) * ldouble(2. * M_PI) * cld{0, 1};
+    for (size_t s = 1; s <= log2(N) ; ++s) {
+       m2 = m;
+       m <<= 1;
+       omega_m = exp(rotation_constant / ldouble(m));
+       for (size_t k = 0 ; k < N ; k += m) {
+           omega = cld{1, 0};
+           for (size_t j = 0 ; j < m2 ; ++j) {
+              id1 = k + j;
+              id2 = id1 + m2;
+              t = omega * data[id2];
+              u = data[id1];
+              data[id1] = u + t;
+              data[id2] = u - t;
+              omega *= omega_m;
+           }
+       }
     }
+    if (isInverse) std::transform(data.begin(), data.end(), data.begin(), [&N](auto& el){ return el / ldouble(N); });
 }
 
 void saveToFile(const FFTSolver &solver) {
@@ -165,13 +159,13 @@ void saveToFile(const FFTSolver &solver) {
 //    file.close();
 }
 
-vector<complex<ldouble>> FFTSolver::getData() const { return data; }
+vector<cld> FFTSolver::getData() const { return data; }
 
 vector<ldouble> FFTSolver::getSolverDomain() const { return domainData; }
 
 vector<ldouble>& FFTSolver::getSolverDomain() { return domainData; }
 
-vector<complex<ldouble>>& FFTSolver::getData() { return data; }
+vector<cld>& FFTSolver::getData() { return data; }
 
 unsigned long FFTSolver::getAudioSampleNo() const { return audioSampleNo; }
 

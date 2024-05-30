@@ -62,7 +62,6 @@ int main() {
 
     FFTSolver isolver(solver.getData(), true, ldouble(audio.sampleRate));
     isolver.recFFT();
-//    isolver.resizeData(isolver.getAudioSampleNo());
     saveToFile(isolver);
     return 0;
 }
