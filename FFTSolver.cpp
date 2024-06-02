@@ -12,18 +12,18 @@ using std::vector, std::complex, std::exp, std::ofstream;
 typedef long double ldouble;
 typedef complex<ldouble> cld;
 
-size_t nearestPower2(size_t N) {
-    if (N == 1) return 1;
-    size_t res = 2;
-    while ((N = N >> 1) != 1) res = res << 1;
-    return res;
-}
-
 size_t nearestPower2up(size_t N) {
     if (N == 1) return 1;
     size_t res = 2;
     while ((N = N >> 1) != 1) res = res << 1;
     return res << 1;
+}
+
+size_t nearestPower2(size_t N) {
+    if (N == 1) return 1;
+    size_t res = 2;
+    while ((N = N >> 1) != 1) res = res << 1;
+    return res;
 }
 
 bool isPower2(const size_t &N) {
@@ -72,8 +72,8 @@ FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : i
     try {
         if (!isPower2(sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampleNo;
-//            sampleNo = nearestPower2(sampleNo);
-            sampleNo = nearestPower2up(sampleNo);
+            sampleNo = nearestPower2(sampleNo);
+//            sampleNo = nearestPower2up(sampleNo);
             data.resize(sampleNo);
             domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
             throw NonPower2Exception(oldSampleNo, sampleNo);
@@ -83,16 +83,16 @@ FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : i
 }
 
 FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
-    domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); // TODO will this work also if passing IFFT to FFT again
+    domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse);
 
 }
 
- void FFTSolver::FFT() {
+ void FFTSolver::recFFT() {
     if (isInverse) for (auto& el : data) { el /= data.size(); }
-    FFTStep(data);
+    recFFTStep(data);
 }
 
- void FFTSolver::FFTStep(vector<cld> &currTransform) {
+ void FFTSolver::recFFTStep(vector<cld> &currTransform) {
      const size_t& N = currTransform.size();
      if (N < 2) return;
      size_t N2 = N >> 1;
@@ -103,8 +103,8 @@ FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(
          odds.emplace_back(currTransform[(2 * i) + 1]);
      }
 
-     FFTStep(evens);
-     FFTStep(odds);
+     recFFTStep(evens);
+     recFFTStep(odds);
 
      cld W = exp(cld((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * cld{0,1} );
      cld Wn = {1, 0};
@@ -117,7 +117,7 @@ FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(
      }
  }
 
- void FFTSolver::iterFFT() {
+ void FFTSolver::FFT() {
     data = bitReversePermuteVec(data);
     const size_t &N = data.size();
     unsigned m = 1, m2; // (m/2)

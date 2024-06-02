@@ -30,15 +30,15 @@ public:
 
    FFTSolver(vector<cld>, bool, ldouble);
 
-   void FFT();
+   void recFFT();
 
-   void FFTStep(vector<cld> &currTransform);
+   void recFFTStep(vector<cld> &currTransform);
 
 /// Compute Fast Fourier Transform (iterFFT) of signal sampling
 /// @param N - number of samples (reduced to a power of 2 by the class constructor if necessary)
 /// @param W - complex number describing rotation of angle (1/N) on complex unit circle
 /// @return Sets class field "data" to a vector of complex numbers representing iterFFT of "sampling" field
-   void iterFFT();
+   void FFT();
 
 
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {

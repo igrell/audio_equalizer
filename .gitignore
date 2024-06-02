@@ -9,3 +9,4 @@ python_utils/__pycache__
 datafiles/*
 results/*
 !info.txt
+img.png
