@@ -75,7 +75,6 @@ FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : i
         if (!isPower2(sampleNo)) { // reduce datafiles to (nearest power of 2) samples
             auto oldSampleNo = sampleNo;
             sampleNo = nearestPower2(sampleNo);
-//            sampleNo = nearestPower2up(sampleNo);
             data.resize(sampleNo);
             domainData = getDomain<ldouble>(ldouble(sampleNo) / ldouble(_sampling.sampleRate), sampleNo, isInverse);
             throw NonPower2Exception(oldSampleNo, sampleNo);
