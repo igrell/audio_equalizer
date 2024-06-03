@@ -2,8 +2,8 @@
 #define EQUALIZE
 
 #include <iostream>
-#include "fstream"
-#include "vector"
+#include <fstream>
+#include <vector>
 #include "SignalSampling.h"
 #include "FFTSolver.h"
 

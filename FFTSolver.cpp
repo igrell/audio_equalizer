@@ -1,12 +1,12 @@
 #include "FFTSolver.h"
 
 #include <utility>
-#include "complex"
-#include "vector"
+#include <complex>
+#include <vector>
+#include <format>
+#include <algorithm>
+#include <numeric>
 #include "exceptions/NonPower2Exception.h"
-#include "format"
-#include "algorithm"
-#include "numeric"
 
 using std::vector, std::complex, std::exp, std::ofstream;
 typedef long double ldouble;

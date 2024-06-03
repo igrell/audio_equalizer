@@ -1,12 +1,12 @@
 #ifndef AUDIO_EQUALIZER_FFTSOLVER_H
 #define AUDIO_EQUALIZER_FFTSOLVER_H
 
-#include "vector"
-#include "complex"
+#include <vector>
+#include <complex>
+#include <cassert>
+#include <iostream>
+#include <fstream>
 #include "SignalSampling.h"
-#include "cassert"
-#include "iostream"
-#include "fstream"
 
 using std::vector, std::complex, std::ostream;
 typedef long double ldouble;

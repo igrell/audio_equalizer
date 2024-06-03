@@ -1,8 +1,8 @@
 #ifndef AUDIO_EQUALIZER_SIGNALSAMPLING_H
 #define AUDIO_EQUALIZER_SIGNALSAMPLING_H
 
-#include "vector"
-#include "cassert"
+#include <vector>
+#include <cassert>
 #include <string>
 
 using std::vector, std::ostream;

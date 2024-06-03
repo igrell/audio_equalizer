@@ -1,7 +1,7 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
 #include "SignalSampling.h"
-#include "iostream"
-#include "fstream"
-#include "vector"
 
 using std::cout, std::ostream, std::string, std::ifstream, std::vector;
 
