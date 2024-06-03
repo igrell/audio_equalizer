@@ -2,7 +2,10 @@ import os.path
 import subprocess
 import tkinter as tk
 from tkinter import *
+from tkinter import ttk
 from tkinter import filedialog as fd
+# from ttkwidgets import TickScale
+
 
 import numpy as np
 from PIL import Image, ImageTk
@@ -92,6 +95,7 @@ def equalize(event=None):
     if audiofilename.get() == '':
         dialoguestr.set('No audio to equalize.')
     else:
+        dialoguestr.set('Equalizing...')
         parser = AudioParser(os.path.basename(audiofilename.get()).split('.')[0])
         parser.parseAudioToSampling()
         slidersState = getSlidersState()
@@ -125,11 +129,17 @@ def setSliders():
     sliders.clear()
     inputFields.clear()
     labels.clear()
+    slidersColors = ['#cc2f00', '#db6600', '#e39e00', '#76b80d', '#007778',
+                     '#006486', '#007cb5', '#465ab2', '#6d47b1', '#873b9c']
+    # style = ttk.Style(window)
+    # style.configure('my.Vertical.TScale')
     # Initialize sliders
     for j in range(0, slidersNo.get()):
         sliderVar = tk.DoubleVar()
+        # slider = TickScale(window, orient='vertical', style='my.Vertical.TScale', from_=amplifyFrom, to=amplifyTo,
+        #                    showvalue=True, length=150, digits=1, resolution=0.1, variable=sliderVar)
         slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
-                       width=sliderWidth.get(), showvalue=True)
+                       width=sliderWidth.get(), showvalue=True, troughcolor=slidersColors[j])
         inputField = Entry(window, width=4, textvariable=sliderVar)
         slider.set((amplifyFrom + amplifyTo) / 2)
         sliders.append(slider)
@@ -345,7 +355,7 @@ if __name__ == '__main__':
     mixer.init()
 
     window = tk.Tk()
-    window.title('Very cool equalizer')
+    window.title('Very cool equalizer ^___^')
 
     # Font
     # default_font = TkFont.nametofont("TkDefaultFont")
