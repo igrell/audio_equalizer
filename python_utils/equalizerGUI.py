@@ -54,11 +54,11 @@ def loadAudioFile(event=None):
             return audiofilename
 
 
-def quitApp(event=None):  # TODO this needn't be here
+def quitApp(event=None):
     window.quit()
 
 
-def playAudio(event=None):  # TODO show 'play' again when audio finishes
+def playAudio(event=None):
     if audiofilename.get() == '':
         dialoguestr.set('No audio to play.')
     else:
@@ -129,7 +129,7 @@ def setSliders():
     for j in range(0, slidersNo.get()):
         sliderVar = tk.DoubleVar()
         slider = Scale(window, from_=amplifyFrom, to=amplifyTo, variable=sliderVar, resolution=0.1, length=150,
-                       width=sliderWidth.get(), showvalue=True)  # TODO think if i can afford showing value
+                       width=sliderWidth.get(), showvalue=True)
         inputField = Entry(window, width=4, textvariable=sliderVar)
         slider.set((amplifyFrom + amplifyTo) / 2)
         sliders.append(slider)
@@ -189,16 +189,16 @@ def setMenu():
     #  Presets menu
     presetsmenu = Menu(menu)
     menu.add_cascade(label='Presets', menu=presetsmenu)
-    presetsmenu.add_command(label='Bass boost', accelerator='Command+B', command=bassBoost)
-    window.bind_all("<Command-b>", bassBoost)
-    presetsmenu.add_command(label='Bass cut', accelerator='Command+B', command=bassCut)
-    window.bind_all("<Command-b>", bassCut)
-    presetsmenu.add_command(label='Midtones boost', accelerator='Command+N', command=midBoost)
-    window.bind_all("<Command-n>", midBoost)
-    presetsmenu.add_command(label='Treble boost', accelerator='Command+M', command=trebleBoost)
-    window.bind_all("<Command-m>", trebleBoost)
-    presetsmenu.add_command(label='Treble cut', accelerator='Command+M', command=trebleCut)
-    window.bind_all("<Command-m>", trebleCut)
+    presetsmenu.add_command(label='Bass boost', accelerator='Command+M', command=bassBoost)
+    window.bind_all("<Command-m>", bassBoost)
+    presetsmenu.add_command(label='Bass cut', accelerator='Command+N', command=bassCut)
+    window.bind_all("<Command-n>", bassCut)
+    presetsmenu.add_command(label='Midtones boost', accelerator='Command+J', command=midBoost)
+    window.bind_all("<Command-j>", midBoost)
+    presetsmenu.add_command(label='Treble boost', accelerator='Command+L', command=trebleBoost)
+    window.bind_all("<Command-l>", trebleBoost)
+    presetsmenu.add_command(label='Treble cut', accelerator='Command+K', command=trebleCut)
+    window.bind_all("<Command-k>", trebleCut)
 
     # Help menu
     helpmenu = Menu(menu)
@@ -215,7 +215,7 @@ def setWindowSize():
         sliderPadX.set(10)
         sliderWidth.set(15)
     elif slidersNo.get() == 31:
-        windowWidth.set(max(1650, screenwidth))  # TODO ???
+        windowWidth.set(max(1650, screenwidth))
         sliderPadX.set(0)
         sliderWidth.set(1)
     window.minsize(windowWidth.get(), windowHeight.get())
@@ -283,6 +283,7 @@ def bassBoost(event=None):
         vals = [10, 10, 8, 8, 3, 0, 0, 0, 0, 0]
     elif slidersNo.get() == 31:
         vals = []
+    dialoguestr.set('Bass boost preset set.')
     setEQ(vals)
 
 
@@ -292,6 +293,7 @@ def bassCut(event=None):
         vals = [-12, -12, -12, -12, 1, 0, 0, 0, 0, 0]
     elif slidersNo.get() == 31:
         vals = []
+    dialoguestr.set('Bass cut preset set.')
     setEQ(vals)
 
 
@@ -301,6 +303,7 @@ def midBoost(event=None):
         vals = [-3, -2, -1, 5, 8, 10, 5, 0, -1, -3]
     elif slidersNo.get() == 31:
         vals = []
+    dialoguestr.set('Midtone boost preset set.')
     setEQ(vals)
 
 
@@ -310,6 +313,7 @@ def trebleBoost(event=None):
         vals = [0, 0, 0, 0, 0, 0, 0, 0, 10, 10]
     elif slidersNo.get() == 31:
         vals = []
+    dialoguestr.set('Treble boost preset set.')
     setEQ(vals)
 
 
@@ -319,6 +323,7 @@ def trebleCut(event=None):
         vals = [0, 0, 0, 0, 0, 0, 0, 2, -12, -12]
     elif slidersNo.get() == 31:
         vals = []
+    dialoguestr.set('Treble cut preset set.')
     setEQ(vals)
 
 

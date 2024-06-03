@@ -10,3 +10,5 @@ datafiles/*
 results/*
 !info.txt
 img.png
+fft.cpp
+ifft.cpp
