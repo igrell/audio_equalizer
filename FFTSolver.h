@@ -44,8 +44,11 @@ public:
     friend ostream& operator<<(ostream& ostream, const FFTSolver& solver) {
         for(auto i = 0 ; i < solver.data.size() - 1 ; ++i) ostream <<
         solver.domainData[i] <<  " " <<
-        (solver.isInverse ? solver.data[i].real() : abs(solver.data[i])) << "\n";
-        ostream << solver.domainData.back() <<  " " << abs(solver.data.back());
+        solver.data[i].real() << "\n";
+//        (solver.isInverse ? solver.data[i].real() : abs(solver.data[i])) << "\n";
+        ostream << solver.domainData.back() <<  " " <<
+        solver.data.back().real();
+//        abs(solver.data.back());
         return ostream;
     }
 

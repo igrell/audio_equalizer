@@ -37,12 +37,13 @@ template size_t bitLen(size_t);
 template<typename T>
 vector<T> bitReversePermuteVec(const vector<T> &vec) {
     const auto &N = vec.size();
-    vector<T> res = vec;
+    vector<T> res(N);
     size_t len = bitLen(N - 1); // get length suitable to 2^n
-    for (size_t i = 1 ; i < (N / 2) - 1 ; ++i) std::swap(res.at(i), res.at(bitReverse(i, len))); // edge indexes changed as edges never swap
+    for (size_t i = 0 ; i < N ; ++i) res[i] = vec[bitReverse(i, len)]; // edge indexes changed as edges never swap
     return res;
 }
 template vector<cld> bitReversePermuteVec(const vector<cld>&);
+template vector<int> bitReversePermuteVec(const vector<int>&);
 
 template<typename T>
 T bitReverse(T n, size_t len) {
@@ -55,6 +56,7 @@ T bitReverse(T n, size_t len) {
     return res;
 }
 template size_t bitReverse(size_t, size_t);
+template int bitReverse(int, size_t);
 
 template<typename T>
 vector<complex<T>> vecToComplex(const vector<T> &vec) {
@@ -83,9 +85,7 @@ FFTSolver::FFTSolver(const SignalSampling& _sampling, const bool _isInverse) : i
 }
 
 FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(std::move(_data)), isInverse(_isInverse), param(_param) {
-    domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse);
-
-}
+    domainData = getDomain<ldouble>(ldouble(data.size()) / _param, data.size(), isInverse); }
 
  void FFTSolver::recFFT() {
     if (isInverse) for (auto& el : data) { el /= data.size(); }
@@ -106,14 +106,13 @@ FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(
      recFFTStep(evens);
      recFFTStep(odds);
 
-     cld W = exp(cld((isInverse ? -1 : 1) * 2.0 * M_PI / ldouble(N) ) * cld{0,1} );
-     cld Wn = {1, 0};
+     cld W;
      cld oddFactor;
      for (size_t k = 0 ; k != N2 ; ++k) {
-         oddFactor = Wn * odds[k];
+         W = exp(cld((isInverse ? -1 : 1) * 2.0 * M_PI * ldouble(k) / ldouble(N) ) * cld{0,1} );
+         oddFactor = W * odds[k];
          currTransform[k] = (evens[k] + oddFactor);
          currTransform[k + N2] = evens[k] - oddFactor;
-         Wn *= W;
      }
  }
 
@@ -133,7 +132,7 @@ FFTSolver::FFTSolver(vector<cld> _data, bool _isInverse, ldouble _param) : data(
            for (size_t j = 0 ; j < m2 ; ++j) {
               id1 = k + j;
               id2 = id1 + m2;
-              t = omega * data[id2];
+              t = data[id2] * omega;
               u = data[id1];
               data[id1] = u + t;
               data[id2] = u - t;
@@ -151,12 +150,6 @@ void saveToFile(const FFTSolver &solver) {
     file << solver.param << "\n";
     file << solver;
     file.close();
-    // save domain to a separate text file
-//    outputFilename = solver.isInverse ? "results/frequency_data.txt" : "results/time_data.txt";
-//    file.open(outputFilename, std::ios::out);
-//    for (auto it = solver.domainData.begin() ; (it + 1) != solver.domainData.end() ; it++) file << (*it) << "\n";
-//    file << solver.domainData.back();
-//    file.close();
 }
 
 vector<cld> FFTSolver::getData() const { return data; }
