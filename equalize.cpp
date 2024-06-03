@@ -55,7 +55,6 @@ int main() {
     SignalSampling audio = parseAudiofile(inputFilename);
     FFTSolver solver(audio, false);
     solver.FFT();
-    saveToFile(solver);
 
     auto state = parseSlidersState("datafiles/freqState.txt");
     equalize(state, solver);
