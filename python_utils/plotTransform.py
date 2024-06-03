@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # Python FFTs
     pythonFft = np.fft.fft(signalData)
-    pythonFft = np.real(pythonFft)
+    # pythonFft = np.real(pythonFft)
     pythonIfft = np.fft.ifft(pythonFft)
 
     delim = 200000  # restrict plot to some first points for visual clarity; make -1 for all data
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     axis[1].set_ylabel('Amplitude')
 
     axis[2].set_title('Python FT')
-    axis[2].plot(frequencies[:delim], abs(pythonFft[:delim]))
+    axis[2].plot(frequencies[:delim], np.real(pythonFft[:delim]))
     axis[2].set_xlabel('Frequency [Hz]')
     axis[2].set_ylabel('Amplitude')
 
@@ -52,4 +52,11 @@ if __name__ == '__main__':
 
     plt.savefig('../results/transform_plot.png')
     plt.show()
-    print(pythonFft)
+    print('Data: ', signalData[:5])
+    print('Python FFT: ', np.real(pythonFft[:5]))
+    print('Own FFT: ', fftData[:5])
+    print('Python IFFT: ', np.real(pythonIfft[:5]))
+    print('Own IFFT: ', np.real(ifftData[:5]))
+
+    # input = [1, 2, 1, 2]
+    # print(np.fft.fft(input))
