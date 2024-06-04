@@ -10,7 +10,7 @@ This project uses C++17 and Python 3, and as such will require:
 
 The C++ files come already compiled to an executable `equalize` file. However, if case of need, you can compile it yourself by invoking:
 
-g++ -std=c++17 SignalSampling.cpp FFTSolver.cpp equalize.cpp -o equalize
+```g++ -std=c++17 SignalSampling.cpp FFTSolver.cpp equalize.cpp -o equalize```
 
 ## Usage
 Navigate to `python_utils` and execute:
