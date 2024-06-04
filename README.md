@@ -6,7 +6,7 @@ This project implements an equalizer of audio signal on the human-perceivable sp
 This project uses C++17 and Python 3, and as such will require:
 * python3 interpreter
 * Python libraries: tkinter, numpy, webbrowser, scipy, contextlib, pygame
-* bash shell (default location: "/bin/bash")
+* bash shell (default location: `/bin/bash`)
 
 The C++ files come already compiled to an executable `equalize` file. However, if case of need, you can compile it yourself by invoking:
 
