@@ -3,9 +3,9 @@
 #include <utility>
 #include <complex>
 #include <vector>
-#include <format>
 #include <algorithm>
 #include <numeric>
+#include <bitset>
 #include "exceptions/NonPower2Exception.h"
 
 using std::vector, std::complex, std::exp, std::ofstream;
@@ -31,15 +31,24 @@ bool isPower2(const size_t &N) {
 }
 
 template<typename T>
-size_t bitLen(T n) { return (std::format("{:b}", n)).length(); }
+size_t bitLen(T N) {
+    constexpr size_t size = sizeof(T) * 8;
+    std::string bitN = std::bitset<size>(N).to_string();
+    size_t res = 0;
+    for (auto it = bitN.begin(); it != bitN.end() and *it == '0' ; ++it) res++;
+    return size - res;
+}
 template size_t bitLen(size_t);
+template size_t bitLen(int);
 
 template<typename T>
 vector<T> bitReversePermuteVec(const vector<T> &vec) {
     const auto &N = vec.size();
     vector<T> res(N);
-    size_t len = bitLen(N - 1); // get length suitable to 2^n
-    for (size_t i = 0 ; i < N ; ++i) res[i] = vec[bitReverse(i, len)]; // edge indexes changed as edges never swap
+    size_t len = bitLen(N - 1); // get length suitable to 2^N
+    res[0] = vec[0];
+    res[N - 1] = vec[N - 1];
+    for (size_t i = 1 ; i < N - 1 ; ++i) res[i] = vec[bitReverse(i, len)];
     return res;
 }
 template vector<cld> bitReversePermuteVec(const vector<cld>&);

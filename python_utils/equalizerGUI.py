@@ -106,7 +106,7 @@ def equalize(event=None):
         ifftData = ifftData.astype(np.int16)
         newAudioFilename = '../sounds/newAudio.wav'
         wavfile.write(newAudioFilename, samplingRate, ifftData.astype(np.int16))
-        dialoguestr.set('Changes applied.')
+        dialoguestr.set('Changes applied. Preview saved to newAudio.wav.')
 
 
 def loadTestSound(event=None):
