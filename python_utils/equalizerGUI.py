@@ -100,7 +100,7 @@ def equalize(event=None):
         parser.parseAudioToSampling()
         slidersState = getSlidersState()
         sliderStateToTxt(slidersState)
-        subprocess.call("cd .. && ./equalize && cd python_utils", shell=True)
+        subprocess.call("cd .. && ./equalizeScript.sh && cd python_utils", shell=True)
         samplingRate, _, ifftData = parseDataFile("../results/ifft_data.txt")  # can be later changed to data
         samplingRate = int(samplingRate)
         ifftData = ifftData.astype(np.int16)
