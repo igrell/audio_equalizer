@@ -157,6 +157,19 @@ def setSliders():
     labels.append(
         [Label(window, textvariable=StringVar(value='Master')), Label(window, textvariable=StringVar(value=''))])
 
+def overwrite():
+    if audiofilename.get() == '':
+        dialoguestr.set('No audio to overwrite.')
+
+def expand():
+    if windowHeight.get() == 400:
+        windowHeight.set(600)
+        window.rowconfigure(6, weight=11)
+    elif windowHeight.get() == 600:
+        windowHeight.set(400)
+        window.rowconfigure(6, weight=0)
+    window.minsize(windowWidth.get(), windowHeight.get())
+    window.maxsize(windowWidth.get(), windowHeight.get())
 
 def setMenu():
     # Main menu
@@ -270,13 +283,17 @@ def updateSlidersNo():
     dialoguestr.set('Changed number of bands to ' + str(slidersNo.get()) + '.')
 
 
-def gridLowerUI():
-    audiofileinfo.grid(row=4, column=0, columnspan=6, padx=10)
-    playButton.grid(row=4, column=(slidersNo.get() - 4))
-    equalizeButton.grid(row=4, column=(slidersNo.get() - 3))
-    resetButton.grid(row=4, column=slidersNo.get() - 2)
-    previewButton.grid(row=4, column=slidersNo.get() - 1)
+def gridLowerUI(lowerUI):
+    audiofileinfo.grid(row=4, column=0, columnspan=3, padx=10)
     dialogue.grid(row=5, columnspan=5, padx=10, sticky=W)
+    elsNo = len(lowerUI)
+    for i in range(elsNo):
+        lowerUI[i].grid(row=4, column=slidersNo.get() - (elsNo - i))
+    # playButton.grid(row=4, column=(slidersNo.get() - 4))
+    # equalizeButton.grid(row=4, column=(slidersNo.get() - 3))
+    # resetButton.grid(row=4, column=slidersNo.get() - 2)
+    # previewButton.grid(row=4, column=slidersNo.get() - 1)
+    # expandCheck.grid(row=4, column=slidersNo.get() - 5)
     # buttonlabel.grid(row=5, column=(slidersNo.get() - 2))
     # button10.grid(row=5, column=(slidersNo.get() - 1))
     # button31.grid(row=5, column=(slidersNo.get()))
@@ -408,12 +425,17 @@ if __name__ == '__main__':
     setSliders()
 
     # Lower part of the GUI
-    audiofileinfo = Label(window, textvariable=audiofilenameshort)
     playButton = Button(window, text='Play', command=playAudio, width=5)
     equalizeButton = Button(window, text='Equalize', command=equalize, width=5)
     resetButton = Button(window, text='Flatten', command=resetSliders, width=5)
     previewButton = Button(window, text='Preview', command=previewEqualization, width=5)
+    overwriteButton = Button(window, text='Overwrite', command=overwrite, width=5)
+    expandCheck = Checkbutton(window, text='Expand', command=expand)
+    lowerUI = [playButton, equalizeButton, resetButton, previewButton, overwriteButton, expandCheck]
+
+    # Dialogue prompt
     dialogue = Label(window, textvariable=dialoguestr)
+    audiofileinfo = Label(window, textvariable=audiofilenameshort)
 
     # Set up buttons for sliders amount
     buttonlabel = Label(window, text='Number of bands: ')
@@ -422,6 +444,6 @@ if __name__ == '__main__':
 
     # Grid everything
     gridSliders()
-    gridLowerUI()
+    gridLowerUI(lowerUI)
 
     window.mainloop()
