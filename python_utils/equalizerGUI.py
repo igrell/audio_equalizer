@@ -234,7 +234,7 @@ def setWindowSize():
     screenwidth = window.winfo_screenwidth()
     windowHeight.set(400)
     if slidersNo.get() == 10:
-        windowWidth.set(int(screenwidth * 0.55))
+        windowWidth.set(800)
         sliderPadX.set(10)
         sliderWidth.set(15)
     elif slidersNo.get() == 31:
