@@ -12,3 +12,6 @@ results/*
 img.png
 fft.cpp
 ifft.cpp
+python_utils/build
+python_utils/__pycache__
+python_utils/dist
