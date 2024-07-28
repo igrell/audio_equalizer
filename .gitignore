@@ -15,3 +15,5 @@ ifft.cpp
 python_utils/build
 python_utils/__pycache__
 python_utils/dist
+python_utils/1equalizerGUI.py
+python_utils/1equalizerGUI.spec
