@@ -98,8 +98,7 @@ def equalize(event=None):
         dialoguestr.set('Equalizing...')
         parser = AudioParser(os.path.basename(audiofilename.get()).split('.')[0])
         parser.parseAudioToSampling()
-        slidersState = getSlidersState()
-        sliderStateToTxt(slidersState)
+        sliderStateToTxt(getSlidersState())
         subprocess.call("cd .. && ./equalizeScript.sh && cd python_utils", shell=True)
         samplingRate, _, ifftData = parseDataFile("../results/ifft_data.txt")  # can be later changed to data
         samplingRate = int(samplingRate)
