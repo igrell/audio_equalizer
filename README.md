@@ -17,8 +17,8 @@ Navigate to `python_utils` and execute:
 
 ```python equalizerGUI.py```
 
-## Note
-This project was written as a part of a thesis for Bachelor's Degree in Computer Mathematics at Jagiellonian University in Kraków. 
+## Note regarding the Bachelor's Thesis
+This project was written as a part of a Bachelor's Degree Thesis in Computer Mathematics at Jagiellonian University in Kraków. The thesis regards Fast Fourier Transform and its applications to signal processing and data compression, from both the theorethical and practical point of view.
 
 Read the full thesis [here](https://ujchmura-my.sharepoint.com/:b:/g/personal/igor_piechowiak_student_uj_edu_pl/Ebm17vK5qcBLovdawDtlXAkB7tdl-MCmtZhOQ3QFDhefOQ?e=vgLciI) (in Polish).
 
