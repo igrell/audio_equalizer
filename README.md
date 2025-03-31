@@ -18,7 +18,9 @@ Navigate to `python_utils` and execute:
 ```python equalizerGUI.py```
 
 ## Note
-This project was written as a part of a thesis for Bachelor's Degree in Computational Mathematics at Jagiellonian University in Kraków.
+This project was written as a part of a thesis for Bachelor's Degree in Computer Mathematics at Jagiellonian University in Kraków. 
+
+Read the full thesis [here](https://ujchmura-my.sharepoint.com/:b:/g/personal/igor_piechowiak_student_uj_edu_pl/Ebm17vK5qcBLovdawDtlXAkB7tdl-MCmtZhOQ3QFDhefOQ?e=vgLciI) (in Polish).
 
 ## Acknowledgements
 * Icon for the equalizer app was downloaded from: https://icons8.com/icons/set/equalizer
